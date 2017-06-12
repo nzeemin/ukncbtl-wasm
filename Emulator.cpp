@@ -63,6 +63,10 @@ long m_nUptimeFrameCount = 0;
 #ifdef __cplusplus
 extern "C" {
 #endif
+//////////////////////////////////////////////////////////////////////
+
+
+const LPCTSTR FILE_NAME_UKNC_ROM = _T("uknc_rom.bin");
 
 void EMSCRIPTEN_KEEPALIVE Emulator_Init()
 {
@@ -76,21 +80,28 @@ void EMSCRIPTEN_KEEPALIVE Emulator_Init()
 
     g_pBoard = new CMotherboard();
 
+    uint8_t buffer[32768];
+    size_t dwBytesRead;
+
+    // Load ROM file
+    memset(buffer, 0, 32768);
+    FILE* fpRomFile = ::fopen(FILE_NAME_UKNC_ROM, _T("rb"));
+    if (fpRomFile == NULL)
+    {
+        printf(_T("Failed to load ROM file."));
+        return;
+    }
+    dwBytesRead = ::fread(buffer, 1, 32256, fpRomFile);
+    ASSERT(dwBytesRead == 32256);
+    ::fclose(fpRomFile);
+
+    g_pBoard->LoadROM(buffer);
+
     g_pBoard->Reset();
 
     g_okEmulatorInitialized = true;
 
     //return g_pFrameBuffer;
-}
-
-void EMSCRIPTEN_KEEPALIVE Emulator_LoadROM(const uint8_t* pROM)
-{
-    printf("Emulator_LoadROM()\n");
-    //printf("%02x %02x\n", pROM[0], pROM[32767]);
-
-    g_pBoard->LoadROM(pROM);
-
-    //g_pBoard->Reset();
 }
 
 uint32_t EMSCRIPTEN_KEEPALIVE Emulator_GetUptime()

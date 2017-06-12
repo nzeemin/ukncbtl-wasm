@@ -139,17 +139,6 @@
                 }
             ],
             postRun: [
-                function () {
-                    var romBuffer = load_binary_resource('uknc_rom.bin');
-                    while (romBuffer.length < 32768)
-                        romBuffer.push(0);
-                    var romImage = new Uint8Array(romBuffer);
-                    var pbuffer = Module._malloc(romImage.length);
-                    //console.log(romImage.length);
-                    Module.HEAPU8.set(romImage, pbuffer);
-                    Module.ccall('Emulator_LoadROM', null, ['number'], [pbuffer]);
-                    Module._free(pbuffer);
-                }
             ],
             print: (function () {
                 var element = document.getElementById('output');
