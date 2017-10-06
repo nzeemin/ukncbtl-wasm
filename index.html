@@ -45,12 +45,21 @@
         }
 
         div.emupanel-main {
+            position: relative;
             width: 640px;
             padding: 0;
             padding-top: 4px;
             display: block;
             background-color: #f0f0f0;
             /*text-align: center;*/
+        }
+
+        div.emupanel-disks {
+            position: absolute;
+            left: 640px;
+            background-color: #f0f0f0;
+            padding: 4px;
+            font-family: monospace;
         }
 
         /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
@@ -153,6 +162,28 @@
             </span>
         </div>
         <div class="emupanel-main">
+            <div class="emupanel-disks">
+                <div style="white-space: nowrap">
+                    MZ0: <label id="labelmz0"></label>
+                    <input id="filemz0" type="file" onchange="emulatorAttachFileInput(this, 0);"/>
+                    <input type="button" id="detachmz0" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 0);"/>
+                </div>
+                <div style="white-space: nowrap">
+                    MZ1: <label id="labelmz1"></label>
+                    <input id="filemz1" type="file" onchange="emulatorAttachFileInput(this, 1);" />
+                    <input type="button" id="detachmz1" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 1);"/>
+                </div>
+                <div style="white-space: nowrap">
+                    MZ2: <label id="labelmz2"></label>
+                    <input id="filemz2" type="file" onchange="emulatorAttachFileInput(this, 2);" />
+                    <input type="button" id="detachmz2" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 2);"/>
+                </div>
+                <div style="white-space: nowrap">
+                    MZ3: <label id="labelmz3"></label>
+                    <input id="filemz3" type="file" onchange="emulatorAttachFileInput(this, 3);" />
+                    <input type="button" id="detachmz3" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 3);"/>
+                </div>
+            </div>
             <canvas class="emscripten" id="canvas" width="640" height="288" oncontextmenu="event.preventDefault()" style="height: 480px;"></canvas>
             <div class="emupanel-keyboard">
                 <img src="keyboard.png" width="610" height="212" usemap="#keyboard" alt="" />
@@ -312,6 +343,15 @@
                 Module.ccall('Emulator_SystemFrame', null, null, null);
                 var regval = Module.ccall('Emulator_GetReg', 'number', null, null);
                 document.getElementById('register').innerText = 'PC ' + (regval < 0 ? regval + 65536 : regval).toString(8);
+            },
+            emulatorAttachFloppy : function(slot, data) {
+                //console.log('emulatorAttachFloppy', data);
+                Module.ccall('Emulator_DetachFloppyImage', null, ['number'], [slot]);
+                Module['FS_createDataFile']('/', 'dsk' + slot, data, true, true, true);
+                Module.ccall('Emulator_AttachFloppyImage', null, ['number'], [slot]);
+            },
+            emulatorDetachFloppy : function(slot) {
+                Module.ccall('Emulator_DetachFloppyImage', null, ['number'], [slot]);
             }
         };
 
@@ -373,6 +413,34 @@
         }
         function emulatorKeyRelease(scan) {
             Module.emulatorKeyEvent(scan, false);
+        }
+
+        function emulatorAttachFileInput(fileInput, slot) {
+            if (fileInput.files.length == 0)
+                return;
+            var file = fileInput.files[0];
+            if (file.size > 819200)
+                return;
+
+            var fr = new FileReader();
+            fr.onload = function () {
+                var dataarr = new Uint8Array(fr.result);
+                Module.emulatorAttachFloppy(slot, dataarr);
+
+                fileInput.value = '';
+                fileInput.style.display = 'none';
+                document.getElementById('labelmz' + slot).innerText = file.name;
+                document.getElementById('detachmz' + slot).style.display = 'inline';
+            };
+            fr.readAsArrayBuffer(file);
+        }
+
+        function emulatorDetachFloppy(button, slot) {
+            Module.emulatorDetachFloppy(slot);
+
+            button.style.display = 'none';
+            document.getElementById('labelmz' + slot).innerText = '';
+            document.getElementById('filemz' + slot).style.display = 'inline';
         }
 
     </script>

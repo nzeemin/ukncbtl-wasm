@@ -39,6 +39,8 @@ const uint32_t Emulator_CanvasRGBAColors[16 * 8] =
 	0xFF000000, 0xFFDF0000, 0xFF00DF00, 0xFFDFDF00, 0xFF0000DF, 0xFFDF00DF, 0xFF00DFDF, 0xFFDFDFDF,
 };
 
+#include "uknc_rom.h"
+
 
 //////////////////////////////////////////////////////////////////////
 
@@ -62,8 +64,6 @@ long m_nUptimeFrameCount = 0;
 
 //////////////////////////////////////////////////////////////////////
 
-
-const LPCTSTR FILE_NAME_UKNC_ROM = _T("uknc_rom.bin");
 
 const int KEYEVENT_QUEUE_SIZE = 32;
 uint16_t m_ScreenKeyQueue[KEYEVENT_QUEUE_SIZE];
@@ -125,21 +125,10 @@ void EMSCRIPTEN_KEEPALIVE Emulator_Init()
 
     g_pBoard = new CMotherboard();
 
-    uint8_t buffer[32768];
-    size_t dwBytesRead;
-
-    // Load ROM file
-    memset(buffer, 0, 32768);
-    FILE* fpRomFile = ::fopen(FILE_NAME_UKNC_ROM, _T("rb"));
-    if (fpRomFile == NULL)
-    {
-        printf(_T("Failed to load ROM file."));
-        return;
-    }
-    dwBytesRead = ::fread(buffer, 1, 32256, fpRomFile);
-    ASSERT(dwBytesRead == 32256);
-    ::fclose(fpRomFile);
-
+	// Load ROM file
+	uint8_t buffer[32768];
+	memset(buffer, 0, 32768);
+	memcpy(buffer, uknc_rom, uknc_rom_length);
     g_pBoard->LoadROM(buffer);
 
     g_pBoard->Reset();
@@ -176,6 +165,42 @@ void EMSCRIPTEN_KEEPALIVE Emulator_Reset()
     ASSERT(g_pBoard != NULL);
 
     g_pBoard->Reset();
+}
+
+void EMSCRIPTEN_KEEPALIVE Emulator_DetachFloppyImage(int slot)
+{
+    g_pBoard->DetachFloppyImage(slot);
+
+	char buffer[6];
+	buffer[0] = '/';
+	buffer[1] = 'd';
+	buffer[2] = 's';
+	buffer[3] = 'k';
+	buffer[4] = slot + '0';
+	buffer[5] = 0;
+
+	remove(buffer);
+}
+
+void EMSCRIPTEN_KEEPALIVE Emulator_AttachFloppyImage(int slot)
+{
+    char buffer[6];
+	buffer[0] = '/';
+	buffer[1] = 'd';
+    buffer[2] = 's';
+    buffer[3] = 'k';
+    buffer[4] = slot + '0';
+    buffer[5] = 0;
+
+	//FILE* fp = fopen(buffer, "r+b");
+	//if (fp == 0)
+	//	printf("Failed to open file\n");
+	//fseek(fp, 0, SEEK_END);
+	//long filesize = ftell(fp);
+	//printf("File length %ld\n", filesize);
+	//fclose(fp);
+
+    g_pBoard->AttachFloppyImage(slot, buffer);
 }
 
 void EMSCRIPTEN_KEEPALIVE Emulator_SystemFrame()
