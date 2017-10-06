@@ -19,24 +19,24 @@ UKNCBTL. If not, see <http://www.gnu.org/licenses/>. */
 void Emulator_PrepareScreenRGB32(void* pBits, const uint32_t* colors);
 
 
-const uint32_t Emulator_CanvasABGRColors[16 * 8] =
+const uint32_t Emulator_CanvasRGBAColors[16 * 8] =
 {
-    0xFF000000, 0xFF800000, 0xFF000080, 0xFF800080, 0xFF008000, 0xFF808000, 0xFF008080, 0xFF808080,
-    0xFF000000, 0xFFFF0000, 0xFF0000FF, 0xFFFF00FF, 0xFF00FF00, 0xFFFFFF00, 0xFF00FFFF, 0xFFFFFFFF,
-    0xFF000000, 0xFF600000, 0xFF000080, 0xFF600080, 0xFF008000, 0xFF608000, 0xFF008080, 0xFF608080,
-    0xFF000000, 0xFFDF0000, 0xFF0000FF, 0xFFDF00FF, 0xFF00FF00, 0xFFDFFF00, 0xFF00FFFF, 0xFFDFFFFF,
-    0xFF000000, 0xFF800000, 0xFF000060, 0xFF800060, 0xFF008000, 0xFF808000, 0xFF008060, 0xFF808060,
-    0xFF000000, 0xFFFF0000, 0xFF0000DF, 0xFFFF00DF, 0xFF00FF00, 0xFFFFFF00, 0xFF00FFDF, 0xFFFFFFDF,
-    0xFF000000, 0xFF600000, 0xFF000060, 0xFF600060, 0xFF008000, 0xFF608000, 0xFF008060, 0xFF608060,
-    0xFF000000, 0xFFDF0000, 0xFF0000DF, 0xFFDF00DF, 0xFF00FF00, 0xFFDFFF00, 0xFF00FFDF, 0xFFDFFFDF,
-    0xFF000000, 0xFF800000, 0xFF000080, 0xFF800080, 0xFF006000, 0xFF806000, 0xFF006080, 0xFF806080,
-    0xFF000000, 0xFFFF0000, 0xFF0000FF, 0xFFFF00FF, 0xFF00DF00, 0xFFFFDF00, 0xFF00DFFF, 0xFFFFDFFF,
-    0xFF000000, 0xFF600000, 0xFF000080, 0xFF600080, 0xFF006000, 0xFF606000, 0xFF006080, 0xFF606080,
-    0xFF000000, 0xFFDF0000, 0xFF0000FF, 0xFFDF00FF, 0xFF00DF00, 0xFFDFDF00, 0xFF00DFFF, 0xFFDFDFFF,
-    0xFF000000, 0xFF800000, 0xFF000060, 0xFF800060, 0xFF006000, 0xFF806000, 0xFF006060, 0xFF806060,
-    0xFF000000, 0xFFFF0000, 0xFF0000DF, 0xFFFF00DF, 0xFF00DF00, 0xFFFFDF00, 0xFF00DFDF, 0xFFFFDFDF,
-    0xFF000000, 0xFF600000, 0xFF000060, 0xFF600060, 0xFF006000, 0xFF606000, 0xFF006060, 0xFF606060,
-    0xFF000000, 0xFFDF0000, 0xFF0000DF, 0xFFDF00DF, 0xFF00DF00, 0xFFDFDF00, 0xFF00DFDF, 0xFFDFDFDF,
+    0xFF000000, 0xFF800000, 0xFF008000, 0xFF808000, 0xFF000080, 0xFF800080, 0xFF008080, 0xFF808080,
+	0xFF000000, 0xFFFF0000, 0xFF00FF00, 0xFFFFFF00, 0xFF0000FF, 0xFFFF00FF, 0xFF00FFFF, 0xFFFFFFFF,
+	0xFF000000, 0xFF600000, 0xFF008000, 0xFF608000, 0xFF000080, 0xFF600080, 0xFF008080, 0xFF608080,
+	0xFF000000, 0xFFDF0000, 0xFF00FF00, 0xFFDFFF00, 0xFF0000FF, 0xFFDF00FF, 0xFF00FFFF, 0xFFDFFFFF,
+	0xFF000000, 0xFF800000, 0xFF006000, 0xFF806000, 0xFF000080, 0xFF800080, 0xFF006080, 0xFF806080,
+	0xFF000000, 0xFFFF0000, 0xFF00DF00, 0xFFFFDF00, 0xFF0000FF, 0xFFFF00FF, 0xFF00DFFF, 0xFFFFDFFF,
+	0xFF000000, 0xFF600000, 0xFF006000, 0xFF606000, 0xFF000080, 0xFF600080, 0xFF006080, 0xFF606080,
+	0xFF000000, 0xFFDF0000, 0xFF00DF00, 0xFFDFDF00, 0xFF0000FF, 0xFFDF00FF, 0xFF00DFFF, 0xFFDFDFFF,
+	0xFF000000, 0xFF800000, 0xFF008000, 0xFF808000, 0xFF000060, 0xFF800060, 0xFF008060, 0xFF808060,
+	0xFF000000, 0xFFFF0000, 0xFF00FF00, 0xFFFFFF00, 0xFF0000DF, 0xFFFF00DF, 0xFF00FFDF, 0xFFFFFFDF,
+	0xFF000000, 0xFF600000, 0xFF008000, 0xFF608000, 0xFF000060, 0xFF600060, 0xFF008060, 0xFF608060,
+	0xFF000000, 0xFFDF0000, 0xFF00FF00, 0xFFDFFF00, 0xFF0000DF, 0xFFDF00DF, 0xFF00FFDF, 0xFFDFFFDF,
+	0xFF000000, 0xFF800000, 0xFF006000, 0xFF806000, 0xFF000060, 0xFF800060, 0xFF006060, 0xFF806060,
+	0xFF000000, 0xFFFF0000, 0xFF00DF00, 0xFFFFDF00, 0xFF0000DF, 0xFFFF00DF, 0xFF00DFDF, 0xFFFFDFDF,
+	0xFF000000, 0xFF600000, 0xFF006000, 0xFF606000, 0xFF000060, 0xFF600060, 0xFF006060, 0xFF606060,
+	0xFF000000, 0xFFDF0000, 0xFF00DF00, 0xFFDFDF00, 0xFF0000DF, 0xFFDF00DF, 0xFF00DFDF, 0xFFDFDFDF,
 };
 
 
@@ -60,13 +60,58 @@ uint32_t m_dwTickCount = 0;
 uint32_t m_dwEmulatorUptime = 0;  // UKNC uptime, seconds, from turn on or reset, increments every 25 frames
 long m_nUptimeFrameCount = 0;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 //////////////////////////////////////////////////////////////////////
 
 
 const LPCTSTR FILE_NAME_UKNC_ROM = _T("uknc_rom.bin");
+
+const int KEYEVENT_QUEUE_SIZE = 32;
+uint16_t m_ScreenKeyQueue[KEYEVENT_QUEUE_SIZE];
+int m_ScreenKeyQueueTop = 0;
+int m_ScreenKeyQueueBottom = 0;
+int m_ScreenKeyQueueCount = 0;
+
+void ScreenView_PutKeyEventToQueue(uint16_t keyevent)
+{
+    if (m_ScreenKeyQueueCount == KEYEVENT_QUEUE_SIZE) return;  // Full queue
+
+    m_ScreenKeyQueue[m_ScreenKeyQueueTop] = keyevent;
+    m_ScreenKeyQueueTop++;
+    if (m_ScreenKeyQueueTop >= KEYEVENT_QUEUE_SIZE)
+        m_ScreenKeyQueueTop = 0;
+    m_ScreenKeyQueueCount++;
+}
+uint16_t ScreenView_GetKeyEventFromQueue()
+{
+    if (m_ScreenKeyQueueCount == 0) return 0;  // Empty queue
+
+    uint16_t keyevent = m_ScreenKeyQueue[m_ScreenKeyQueueBottom];
+    m_ScreenKeyQueueBottom++;
+    if (m_ScreenKeyQueueBottom >= KEYEVENT_QUEUE_SIZE)
+        m_ScreenKeyQueueBottom = 0;
+    m_ScreenKeyQueueCount--;
+
+    return keyevent;
+}
+void ScreenView_ProcessKeyboard()
+{
+    // Process next event in the keyboard queue
+    uint16_t keyevent = ScreenView_GetKeyEventFromQueue();
+    if (keyevent != 0)
+    {
+        bool pressed = ((keyevent & 0x8000) != 0);
+        bool ctrl = ((keyevent & 0x4000) != 0);
+        uint8_t scan = (uint8_t)(keyevent & 0x7f);
+        printf(_T("KeyEvent: %04o %d %d\r\n"), scan, pressed, ctrl);
+
+        g_pBoard->KeyboardEvent(scan, pressed);
+    }
+}
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void EMSCRIPTEN_KEEPALIVE Emulator_Init()
 {
@@ -100,8 +145,6 @@ void EMSCRIPTEN_KEEPALIVE Emulator_Init()
     g_pBoard->Reset();
 
     g_okEmulatorInitialized = true;
-
-    //return g_pFrameBuffer;
 }
 
 uint32_t EMSCRIPTEN_KEEPALIVE Emulator_GetUptime()
@@ -126,7 +169,6 @@ void EMSCRIPTEN_KEEPALIVE Emulator_Stop()
 
     g_okEmulatorRunning = false;
 }
-
 void EMSCRIPTEN_KEEPALIVE Emulator_Reset()
 {
     printf("Emulator_Reset()\n");
@@ -145,7 +187,7 @@ void EMSCRIPTEN_KEEPALIVE Emulator_SystemFrame()
     g_pBoard->SetCPUBreakpoint(m_wEmulatorCPUBreakpoint);
     g_pBoard->SetPPUBreakpoint(m_wEmulatorPPUBreakpoint);
 
-    //ScreenView_ScanKeyboard();
+    ScreenView_ProcessKeyboard();
 
     if (!g_pBoard->SystemFrame())
         return;
@@ -165,9 +207,15 @@ void* EMSCRIPTEN_KEEPALIVE Emulator_PrepareScreen()
     if (g_pFrameBuffer == 0)
         printf("Emulator_PrepareScreen() null framebuffer\n");
 
-    Emulator_PrepareScreenRGB32(g_pFrameBuffer, Emulator_CanvasABGRColors);
+    Emulator_PrepareScreenRGB32(g_pFrameBuffer, Emulator_CanvasRGBAColors);
 
     return g_pFrameBuffer;
+}
+
+void EMSCRIPTEN_KEEPALIVE Emulator_KeyEvent(uint8_t keyscan, bool pressed)
+{
+    //printf("Emulator_KeyEvent(%04o, %d)\n", keyscan, pressed);
+    ScreenView_PutKeyEventToQueue(uint16_t(keyscan) | (pressed ? 0x8000 : 0));
 }
 
 #ifdef __cplusplus
@@ -208,7 +256,7 @@ void Emulator_PrepareScreenRGB32(void* pImageBits, const uint32_t* colors)
 
             if (okTagType)  // 4-uint16_t palette tag
             {
-                palette = MAKELONG(tag1, tag2);
+                palette = ((uint32_t)tag1) | ((uint32_t)tag2 << 16);
             }
             else  // 4-uint16_t params tag
             {
