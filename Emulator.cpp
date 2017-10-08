@@ -22,21 +22,21 @@ void Emulator_PrepareScreenRGB32(void* pBits, const uint32_t* colors);
 const uint32_t Emulator_CanvasRGBAColors[16 * 8] =
 {
     0xFF000000, 0xFF800000, 0xFF008000, 0xFF808000, 0xFF000080, 0xFF800080, 0xFF008080, 0xFF808080,
-	0xFF000000, 0xFFFF0000, 0xFF00FF00, 0xFFFFFF00, 0xFF0000FF, 0xFFFF00FF, 0xFF00FFFF, 0xFFFFFFFF,
-	0xFF000000, 0xFF600000, 0xFF008000, 0xFF608000, 0xFF000080, 0xFF600080, 0xFF008080, 0xFF608080,
-	0xFF000000, 0xFFDF0000, 0xFF00FF00, 0xFFDFFF00, 0xFF0000FF, 0xFFDF00FF, 0xFF00FFFF, 0xFFDFFFFF,
-	0xFF000000, 0xFF800000, 0xFF006000, 0xFF806000, 0xFF000080, 0xFF800080, 0xFF006080, 0xFF806080,
-	0xFF000000, 0xFFFF0000, 0xFF00DF00, 0xFFFFDF00, 0xFF0000FF, 0xFFFF00FF, 0xFF00DFFF, 0xFFFFDFFF,
-	0xFF000000, 0xFF600000, 0xFF006000, 0xFF606000, 0xFF000080, 0xFF600080, 0xFF006080, 0xFF606080,
-	0xFF000000, 0xFFDF0000, 0xFF00DF00, 0xFFDFDF00, 0xFF0000FF, 0xFFDF00FF, 0xFF00DFFF, 0xFFDFDFFF,
-	0xFF000000, 0xFF800000, 0xFF008000, 0xFF808000, 0xFF000060, 0xFF800060, 0xFF008060, 0xFF808060,
-	0xFF000000, 0xFFFF0000, 0xFF00FF00, 0xFFFFFF00, 0xFF0000DF, 0xFFFF00DF, 0xFF00FFDF, 0xFFFFFFDF,
-	0xFF000000, 0xFF600000, 0xFF008000, 0xFF608000, 0xFF000060, 0xFF600060, 0xFF008060, 0xFF608060,
-	0xFF000000, 0xFFDF0000, 0xFF00FF00, 0xFFDFFF00, 0xFF0000DF, 0xFFDF00DF, 0xFF00FFDF, 0xFFDFFFDF,
-	0xFF000000, 0xFF800000, 0xFF006000, 0xFF806000, 0xFF000060, 0xFF800060, 0xFF006060, 0xFF806060,
-	0xFF000000, 0xFFFF0000, 0xFF00DF00, 0xFFFFDF00, 0xFF0000DF, 0xFFFF00DF, 0xFF00DFDF, 0xFFFFDFDF,
-	0xFF000000, 0xFF600000, 0xFF006000, 0xFF606000, 0xFF000060, 0xFF600060, 0xFF006060, 0xFF606060,
-	0xFF000000, 0xFFDF0000, 0xFF00DF00, 0xFFDFDF00, 0xFF0000DF, 0xFFDF00DF, 0xFF00DFDF, 0xFFDFDFDF,
+    0xFF000000, 0xFFFF0000, 0xFF00FF00, 0xFFFFFF00, 0xFF0000FF, 0xFFFF00FF, 0xFF00FFFF, 0xFFFFFFFF,
+    0xFF000000, 0xFF600000, 0xFF008000, 0xFF608000, 0xFF000080, 0xFF600080, 0xFF008080, 0xFF608080,
+    0xFF000000, 0xFFDF0000, 0xFF00FF00, 0xFFDFFF00, 0xFF0000FF, 0xFFDF00FF, 0xFF00FFFF, 0xFFDFFFFF,
+    0xFF000000, 0xFF800000, 0xFF006000, 0xFF806000, 0xFF000080, 0xFF800080, 0xFF006080, 0xFF806080,
+    0xFF000000, 0xFFFF0000, 0xFF00DF00, 0xFFFFDF00, 0xFF0000FF, 0xFFFF00FF, 0xFF00DFFF, 0xFFFFDFFF,
+    0xFF000000, 0xFF600000, 0xFF006000, 0xFF606000, 0xFF000080, 0xFF600080, 0xFF006080, 0xFF606080,
+    0xFF000000, 0xFFDF0000, 0xFF00DF00, 0xFFDFDF00, 0xFF0000FF, 0xFFDF00FF, 0xFF00DFFF, 0xFFDFDFFF,
+    0xFF000000, 0xFF800000, 0xFF008000, 0xFF808000, 0xFF000060, 0xFF800060, 0xFF008060, 0xFF808060,
+    0xFF000000, 0xFFFF0000, 0xFF00FF00, 0xFFFFFF00, 0xFF0000DF, 0xFFFF00DF, 0xFF00FFDF, 0xFFFFFFDF,
+    0xFF000000, 0xFF600000, 0xFF008000, 0xFF608000, 0xFF000060, 0xFF600060, 0xFF008060, 0xFF608060,
+    0xFF000000, 0xFFDF0000, 0xFF00FF00, 0xFFDFFF00, 0xFF0000DF, 0xFFDF00DF, 0xFF00FFDF, 0xFFDFFFDF,
+    0xFF000000, 0xFF800000, 0xFF006000, 0xFF806000, 0xFF000060, 0xFF800060, 0xFF006060, 0xFF806060,
+    0xFF000000, 0xFFFF0000, 0xFF00DF00, 0xFFFFDF00, 0xFF0000DF, 0xFFFF00DF, 0xFF00DFDF, 0xFFFFDFDF,
+    0xFF000000, 0xFF600000, 0xFF006000, 0xFF606000, 0xFF000060, 0xFF600060, 0xFF006060, 0xFF606060,
+    0xFF000000, 0xFFDF0000, 0xFF00DF00, 0xFFDFDF00, 0xFF0000DF, 0xFFDF00DF, 0xFF00DFDF, 0xFFDFDFDF,
 };
 
 #include "uknc_rom.h"
@@ -113,135 +113,193 @@ void ScreenView_ProcessKeyboard()
 extern "C" {
 #endif
 
-void EMSCRIPTEN_KEEPALIVE Emulator_Init()
-{
-    printf("Emulator_Init()\n");
-
-    g_pFrameBuffer = malloc(640 * 288 * 4);
-
-    ASSERT(g_pBoard == NULL);
-
-    CProcessor::Init();
-
-    g_pBoard = new CMotherboard();
-
-	// Load ROM file
-	uint8_t buffer[32768];
-	memset(buffer, 0, 32768);
-	memcpy(buffer, uknc_rom, uknc_rom_length);
-    g_pBoard->LoadROM(buffer);
-
-    g_pBoard->Reset();
-
-    g_okEmulatorInitialized = true;
-}
-
-uint32_t EMSCRIPTEN_KEEPALIVE Emulator_GetUptime()
-{
-    return m_dwEmulatorUptime;
-}
-
-uint16_t EMSCRIPTEN_KEEPALIVE Emulator_GetReg()
-{
-    return g_pBoard->GetPPU()->GetPC();
-}
-
-void EMSCRIPTEN_KEEPALIVE Emulator_Start()
-{
-    printf("Emulator_Start()\n");
-
-    g_okEmulatorRunning = true;
-}
-void EMSCRIPTEN_KEEPALIVE Emulator_Stop()
-{
-    printf("Emulator_Stop()\n");
-
-    g_okEmulatorRunning = false;
-}
-void EMSCRIPTEN_KEEPALIVE Emulator_Reset()
-{
-    printf("Emulator_Reset()\n");
-
-    ASSERT(g_pBoard != NULL);
-
-    g_pBoard->Reset();
-}
-
-void EMSCRIPTEN_KEEPALIVE Emulator_DetachFloppyImage(int slot)
-{
-    g_pBoard->DetachFloppyImage(slot);
-
-	char buffer[6];
-	buffer[0] = '/';
-	buffer[1] = 'd';
-	buffer[2] = 's';
-	buffer[3] = 'k';
-	buffer[4] = slot + '0';
-	buffer[5] = 0;
-
-	remove(buffer);
-}
-
-void EMSCRIPTEN_KEEPALIVE Emulator_AttachFloppyImage(int slot)
-{
-    char buffer[6];
-	buffer[0] = '/';
-	buffer[1] = 'd';
-    buffer[2] = 's';
-    buffer[3] = 'k';
-    buffer[4] = slot + '0';
-    buffer[5] = 0;
-
-	//FILE* fp = fopen(buffer, "r+b");
-	//if (fp == 0)
-	//	printf("Failed to open file\n");
-	//fseek(fp, 0, SEEK_END);
-	//long filesize = ftell(fp);
-	//printf("File length %ld\n", filesize);
-	//fclose(fp);
-
-    g_pBoard->AttachFloppyImage(slot, buffer);
-}
-
-void EMSCRIPTEN_KEEPALIVE Emulator_SystemFrame()
-{
-    //printf("Emulator_SystemFrame()\n");
-
-    //SoundGen_SetVolume(Settings_GetSoundVolume());
-
-    g_pBoard->SetCPUBreakpoint(m_wEmulatorCPUBreakpoint);
-    g_pBoard->SetPPUBreakpoint(m_wEmulatorPPUBreakpoint);
-
-    ScreenView_ProcessKeyboard();
-
-    if (!g_pBoard->SystemFrame())
-        return;
-
-    // Calculate emulator uptime (25 frames per second)
-    m_nUptimeFrameCount++;
-    if (m_nUptimeFrameCount >= 25)
+    void EMSCRIPTEN_KEEPALIVE Emulator_Init()
     {
-        m_dwEmulatorUptime++;
-        m_nUptimeFrameCount = 0;
+        printf("Emulator_Init()\n");
+
+        g_pFrameBuffer = malloc(640 * 288 * 4);
+
+        ASSERT(g_pBoard == NULL);
+
+        CProcessor::Init();
+
+        g_pBoard = new CMotherboard();
+
+        // Load ROM file
+        uint8_t buffer[32768];
+        memset(buffer, 0, 32768);
+        memcpy(buffer, uknc_rom, uknc_rom_length);
+        g_pBoard->LoadROM(buffer);
+
+        g_pBoard->Reset();
+
+        g_okEmulatorInitialized = true;
     }
-}
 
-void* EMSCRIPTEN_KEEPALIVE Emulator_PrepareScreen()
-{
-    //printf("Emulator_PrepareScreen()\n");
-    if (g_pFrameBuffer == 0)
-        printf("Emulator_PrepareScreen() null framebuffer\n");
+    uint32_t EMSCRIPTEN_KEEPALIVE Emulator_GetUptime()
+    {
+        return m_dwEmulatorUptime;
+    }
 
-    Emulator_PrepareScreenRGB32(g_pFrameBuffer, Emulator_CanvasRGBAColors);
+    uint16_t EMSCRIPTEN_KEEPALIVE Emulator_GetReg()
+    {
+        return g_pBoard->GetPPU()->GetPC();
+    }
 
-    return g_pFrameBuffer;
-}
+    void EMSCRIPTEN_KEEPALIVE Emulator_Start()
+    {
+        printf("Emulator_Start()\n");
 
-void EMSCRIPTEN_KEEPALIVE Emulator_KeyEvent(uint8_t keyscan, bool pressed)
-{
-    //printf("Emulator_KeyEvent(%04o, %d)\n", keyscan, pressed);
-    ScreenView_PutKeyEventToQueue(uint16_t(keyscan) | (pressed ? 0x8000 : 0));
-}
+        g_okEmulatorRunning = true;
+    }
+    void EMSCRIPTEN_KEEPALIVE Emulator_Stop()
+    {
+        printf("Emulator_Stop()\n");
+
+        g_okEmulatorRunning = false;
+    }
+    void EMSCRIPTEN_KEEPALIVE Emulator_Reset()
+    {
+        printf("Emulator_Reset()\n");
+
+        ASSERT(g_pBoard != NULL);
+
+        g_pBoard->Reset();
+    }
+
+    void EMSCRIPTEN_KEEPALIVE Emulator_DetachFloppyImage(int slot)
+    {
+        g_pBoard->DetachFloppyImage(slot);
+
+        char buffer[6];
+        buffer[0] = '/';
+        buffer[1] = 'd';
+        buffer[2] = 's';
+        buffer[3] = 'k';
+        buffer[4] = slot + '0';
+        buffer[5] = 0;
+
+        remove(buffer);
+    }
+
+    void EMSCRIPTEN_KEEPALIVE Emulator_AttachFloppyImage(int slot)
+    {
+        char buffer[6];
+        buffer[0] = '/';
+        buffer[1] = 'd';
+        buffer[2] = 's';
+        buffer[3] = 'k';
+        buffer[4] = slot + '0';
+        buffer[5] = 0;
+
+        //FILE* fp = fopen(buffer, "r+b");
+        //if (fp == 0)
+        //	printf("Failed to open file\n");
+        //fseek(fp, 0, SEEK_END);
+        //long filesize = ftell(fp);
+        //printf("File length %ld\n", filesize);
+        //fclose(fp);
+
+        g_pBoard->AttachFloppyImage(slot, buffer);
+    }
+
+    void EMSCRIPTEN_KEEPALIVE Emulator_SystemFrame()
+    {
+        //printf("Emulator_SystemFrame()\n");
+
+        //SoundGen_SetVolume(Settings_GetSoundVolume());
+
+        g_pBoard->SetCPUBreakpoint(m_wEmulatorCPUBreakpoint);
+        g_pBoard->SetPPUBreakpoint(m_wEmulatorPPUBreakpoint);
+
+        ScreenView_ProcessKeyboard();
+
+        if (!g_pBoard->SystemFrame())
+            return;
+
+        // Calculate emulator uptime (25 frames per second)
+        m_nUptimeFrameCount++;
+        if (m_nUptimeFrameCount >= 25)
+        {
+            m_dwEmulatorUptime++;
+            m_nUptimeFrameCount = 0;
+        }
+    }
+
+    void* EMSCRIPTEN_KEEPALIVE Emulator_PrepareScreen()
+    {
+        //printf("Emulator_PrepareScreen()\n");
+        if (g_pFrameBuffer == 0)
+            printf("Emulator_PrepareScreen() null framebuffer\n");
+
+        Emulator_PrepareScreenRGB32(g_pFrameBuffer, Emulator_CanvasRGBAColors);
+
+        return g_pFrameBuffer;
+    }
+
+    void EMSCRIPTEN_KEEPALIVE Emulator_KeyEvent(uint8_t keyscan, bool pressed)
+    {
+        //printf("Emulator_KeyEvent(%04o, %d)\n", keyscan, pressed);
+        ScreenView_PutKeyEventToQueue(uint16_t(keyscan) | (pressed ? 0x8000 : 0));
+    }
+
+    void EMSCRIPTEN_KEEPALIVE Emulator_LoadImage()
+    {
+        const char * imageFileName = "/image";
+
+        Emulator_Stop();
+
+        // Open file
+        FILE* fpFile = ::fopen(imageFileName, "rb");
+        if (fpFile == NULL)
+        {
+            remove(imageFileName);
+            printf("Emulator_LoadImage(): failed to open file\n");
+            return;
+        }
+
+        // Read header
+        uint32_t bufHeader[UKNCIMAGE_HEADER_SIZE / sizeof(uint32_t)];
+        uint32_t dwBytesRead = ::fread(bufHeader, 1, UKNCIMAGE_HEADER_SIZE, fpFile);
+        if (dwBytesRead != UKNCIMAGE_HEADER_SIZE)
+        {
+            ::fclose(fpFile);
+            remove(imageFileName);
+            printf("Emulator_LoadImage(): failed to read file\n");
+            return;
+        }
+
+        // Allocate memory
+        uint8_t* pImage = (uint8_t*) ::malloc(UKNCIMAGE_SIZE);
+        if (pImage == NULL)
+        {
+            ::fclose(fpFile);
+            remove(imageFileName);
+            printf("Emulator_LoadImage(): malloc failed\n");
+            return;
+        }
+
+        // Read image
+        ::fseek(fpFile, 0, SEEK_SET);
+        dwBytesRead = ::fread(pImage, 1, UKNCIMAGE_SIZE, fpFile);
+        ::fclose(fpFile);
+        remove(imageFileName);
+        if (dwBytesRead != UKNCIMAGE_SIZE)
+        {
+            ::free(pImage);
+            printf("Emulator_LoadImage(): failed to read file\n");
+            return;
+        }
+
+        // Restore emulator state from the image
+        g_pBoard->LoadFromImage(pImage);
+
+        m_dwEmulatorUptime = *(uint32_t*)(pImage + 16);
+
+        // Free memory
+        ::free(pImage);
+        printf("Emulator_LoadImage() done\n");
+    }
 
 #ifdef __cplusplus
 }
@@ -391,6 +449,5 @@ void Emulator_PrepareScreenRGB32(void* pImageBits, const uint32_t* colors)
         }
     }
 }
-
 
 //////////////////////////////////////////////////////////////////////

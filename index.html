@@ -48,23 +48,33 @@
             position: relative;
             width: 640px;
             padding: 0;
-            padding-top: 4px;
+            padding-top: 0;
             display: block;
             background-color: #f0f0f0;
             /*text-align: center;*/
+        }
+
+        div.emupanel-controls {
+            position: absolute;
+            right: 640px;
+            background-color: #f0f0f0;
+            padding: 8px;
+            font-family: monospace;
+            width: 100px;
+            text-align: center;
         }
 
         div.emupanel-disks {
             position: absolute;
             left: 640px;
             background-color: #f0f0f0;
-            padding: 4px;
+            padding: 8px;
             font-family: monospace;
         }
 
         /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
         canvas.emscripten {
-            border: 0px none;
+            border: 0 none;
             background-color: black;
             width: 640px;
             height: 288px;
@@ -150,95 +160,103 @@
     </div>
 
     <div class="emupanel">
-        <div class="emupanel-toolbar">
-            <input id="buttonStart" type="button" value="Run" onclick="emulatorStart()" style="width: 60px;">
-            <input type="button" value="Reset" onclick="Module.emulatorReset()" style="width: 60px;">
-            <!--<input type="button" value="Frame" onclick="Module.systemFrame()">-->
-            <!--<input type="button" value="25 Frames" onclick="emulatorSystemFrame25()">-->
-            <!--<input type="button" value="Draw Screen" onclick="Module.drawScreen()">-->
-            <span class="emupanel-registers">
-                <span id="register"></span>
-                <span id="uptime"></span>
-            </span>
-        </div>
         <div class="emupanel-main">
+            <div class="emupanel-controls">
+                <input id="buttonStart" type="button" value="Run" onclick="emulatorStart()" style="width: 60px;">
+                <input type="button" value="Reset" onclick="Module.emulatorReset()" style="width: 60px;">
+                <!--<input type="button" value="Frame" onclick="Module.systemFrame()">-->
+                <!--<input type="button" value="25 Frames" onclick="emulatorSystemFrame25()">-->
+                <!--<input type="button" value="Draw Screen" onclick="Module.drawScreen()">-->
+                <div class="emupanel-registers">
+                    <div id="register" style="white-space: nowrap"></div>
+                    <div id="uptime" style="white-space: nowrap"></div>
+                </div>
+            </div>
             <div class="emupanel-disks">
                 <div style="white-space: nowrap">
                     MZ0: <label id="labelmz0"></label>
-                    <input id="filemz0" type="file" onchange="emulatorAttachFileInput(this, 0);"/>
+                    <input id="filemz0" type="file" onchange="emulatorAttachFileInput(this, 0);" style="display: none"/>
+                    <input type="button" id="attachmz0" value="Attach" onclick="document.getElementById('filemz0').click();" />
                     <input type="button" id="detachmz0" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 0);"/>
                 </div>
                 <div style="white-space: nowrap">
                     MZ1: <label id="labelmz1"></label>
-                    <input id="filemz1" type="file" onchange="emulatorAttachFileInput(this, 1);" />
+                    <input id="filemz1" type="file" onchange="emulatorAttachFileInput(this, 1);" style="display: none"/>
+                    <input type="button" id="attachmz1" value="Attach" onclick="document.getElementById('filemz1').click();" />
                     <input type="button" id="detachmz1" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 1);"/>
                 </div>
                 <div style="white-space: nowrap">
                     MZ2: <label id="labelmz2"></label>
-                    <input id="filemz2" type="file" onchange="emulatorAttachFileInput(this, 2);" />
+                    <input id="filemz2" type="file" onchange="emulatorAttachFileInput(this, 2);" style="display: none"/>
+                    <input type="button" id="attachmz2" value="Attach" onclick="document.getElementById('filemz2').click();" />
                     <input type="button" id="detachmz2" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 2);"/>
                 </div>
                 <div style="white-space: nowrap">
                     MZ3: <label id="labelmz3"></label>
-                    <input id="filemz3" type="file" onchange="emulatorAttachFileInput(this, 3);" />
+                    <input id="filemz3" type="file" onchange="emulatorAttachFileInput(this, 3);" style="display: none"/>
+                    <input type="button" id="attachmz3" value="Attach" onclick="document.getElementById('filemz3').click();" />
                     <input type="button" id="detachmz3" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 3);"/>
+                </div>
+                <div style="white-space: nowrap">
+                    <input id="fileimg" type="file" onchange="emulatorLoadImage(this);" style="display: none" />
+                    <input type="button" id="loadimg" value="Load State" onclick="document.getElementById('fileimg').click();" />
                 </div>
             </div>
             <canvas class="emscripten" id="canvas" width="640" height="288" oncontextmenu="event.preventDefault()" style="height: 480px;"></canvas>
             <div class="emupanel-keyboard">
-                <img src="keyboard.png" width="610" height="212" usemap="#keyboard" alt="" />
+                <img src="keyboard.png" width="610" height="212" usemap="#keyboard" alt=""/>
             </div>
             <map name="keyboard">
-                <area shape="rect" coords="018,015,060,042" alt="0010" href="javascript:void(0)" onmousedown="emulatorKeyPress(8)" onmouseup="emulatorKeyRelease(8)" />
-                <area shape="rect" coords="062,015,104,042" alt="0011" href="javascript:void(0)" onmousedown="emulatorKeyPress(9)" onmouseup="emulatorKeyRelease(9)" />
-                <area shape="rect" coords="106,015,148,042" alt="0012" href="javascript:void(0)" onmousedown="emulatorKeyPress(10)" onmouseup="emulatorKeyRelease(10)" />
-                <area shape="rect" coords="151,015,193,042" alt="0014" href="javascript:void(0)" onmousedown="emulatorKeyPress(12)" onmouseup="emulatorKeyRelease(12)" />
-                <area shape="rect" coords="195,015,237,042" alt="0015" href="javascript:void(0)" onmousedown="emulatorKeyPress(13)" onmouseup="emulatorKeyRelease(13)" />
-                <area shape="rect" coords="343,015,385,042" alt="0172" href="javascript:void(0)" onmousedown="emulatorKeyPress(122)" onmouseup="emulatorKeyRelease(122)" />
-                <area shape="rect" coords="387,015,429,042" alt="0152" href="javascript:void(0)" onmousedown="emulatorKeyPress(106)" onmouseup="emulatorKeyRelease(106)" />
-                <area shape="rect" coords="431,015,473,042" alt="0151" href="javascript:void(0)" onmousedown="emulatorKeyPress(105)" onmouseup="emulatorKeyRelease(105)" />
-                <area shape="rect" coords="506,015,548,042" alt="0171" href="javascript:void(0)" onmousedown="emulatorKeyPress(121)" onmouseup="emulatorKeyRelease(121)" />
-                <area shape="rect" coords="551,015,593,042" alt="0004" href="javascript:void(0)" onmousedown="emulatorKeyPress(4)" onmouseup="emulatorKeyRelease(4)" />
+                <area shape="rect" coords="018,015,060,042" alt="0010" href="javascript:void(0)" onmousedown="emulatorKeyPress(8)" onmouseup="emulatorKeyRelease(8)"/>
+                <area shape="rect" coords="062,015,104,042" alt="0011" href="javascript:void(0)" onmousedown="emulatorKeyPress(9)" onmouseup="emulatorKeyRelease(9)"/>
+                <area shape="rect" coords="106,015,148,042" alt="0012" href="javascript:void(0)" onmousedown="emulatorKeyPress(10)" onmouseup="emulatorKeyRelease(10)"/>
+                <area shape="rect" coords="151,015,193,042" alt="0014" href="javascript:void(0)" onmousedown="emulatorKeyPress(12)" onmouseup="emulatorKeyRelease(12)"/>
+                <area shape="rect" coords="195,015,237,042" alt="0015" href="javascript:void(0)" onmousedown="emulatorKeyPress(13)" onmouseup="emulatorKeyRelease(13)"/>
+                <area shape="rect" coords="343,015,385,042" alt="0172" href="javascript:void(0)" onmousedown="emulatorKeyPress(122)" onmouseup="emulatorKeyRelease(122)"/>
+                <area shape="rect" coords="387,015,429,042" alt="0152" href="javascript:void(0)" onmousedown="emulatorKeyPress(106)" onmouseup="emulatorKeyRelease(106)"/>
+                <area shape="rect" coords="431,015,473,042" alt="0151" href="javascript:void(0)" onmousedown="emulatorKeyPress(105)" onmouseup="emulatorKeyRelease(105)"/>
+                <area shape="rect" coords="506,015,548,042" alt="0171" href="javascript:void(0)" onmousedown="emulatorKeyPress(121)" onmouseup="emulatorKeyRelease(121)"/>
+                <area shape="rect" coords="551,015,593,042" alt="0004" href="javascript:void(0)" onmousedown="emulatorKeyPress(4)" onmouseup="emulatorKeyRelease(4)"/>
                 <!-- 1st row -->
-                <area shape="rect" coords="018,056,046,083" alt="0006" href="javascript:void(0)" onmousedown="emulatorKeyPress(6)" onmouseup="emulatorKeyRelease(6)" />
-                <area shape="rect" coords="047,056,075,083" alt="0007" href="javascript:void(0)" onmousedown="emulatorKeyPress(7)" onmouseup="emulatorKeyRelease(7)" />
-                <area shape="rect" coords="077,056,104,083" alt="0030" href="javascript:void(0)" onmousedown="emulatorKeyPress(24)" onmouseup="emulatorKeyRelease(24)" />
-                <area shape="rect" coords="106,056,134,083" alt="0031" href="javascript:void(0)" onmousedown="emulatorKeyPress(25)" onmouseup="emulatorKeyRelease(25)" />
-                <area shape="rect" coords="136,056,163,083" alt="0032" href="javascript:void(0)" onmousedown="emulatorKeyPress(26)" onmouseup="emulatorKeyRelease(26)" />
-                <area shape="rect" coords="165,056,193,083" alt="0013" href="javascript:void(0)" onmousedown="emulatorKeyPress(11)" onmouseup="emulatorKeyRelease(11)" />
-                <area shape="rect" coords="195,056,222,083" alt="0034" href="javascript:void(0)" onmousedown="emulatorKeyPress(28)" onmouseup="emulatorKeyRelease(28)" />
-                <area shape="rect" coords="224,056,252,083" alt="0035" href="javascript:void(0)" onmousedown="emulatorKeyPress(29)" onmouseup="emulatorKeyRelease(29)" />
-                <area shape="rect" coords="254,056,281,083" alt="0016" href="javascript:void(0)" onmousedown="emulatorKeyPress(14)" onmouseup="emulatorKeyRelease(14)" />
-                <area shape="rect" coords="283,056,311,083" alt="0017" href="javascript:void(0)" onmousedown="emulatorKeyPress(15)" onmouseup="emulatorKeyRelease(15)" />
-                <area shape="rect" coords="313,056,340,083" alt="0177" href="javascript:void(0)" onmousedown="emulatorKeyPress(127)" onmouseup="emulatorKeyRelease(127)" />
-                <area shape="rect" coords="342,056,370,083" alt="0176" href="javascript:void(0)" onmousedown="emulatorKeyPress(126)" onmouseup="emulatorKeyRelease(126)" />
-                <area shape="rect" coords="372,056,399,083" alt="0175" href="javascript:void(0)" onmousedown="emulatorKeyPress(125)" onmouseup="emulatorKeyRelease(125)" />
-                <area shape="rect" coords="401,056,429,083" alt="0173" href="javascript:void(0)" onmousedown="emulatorKeyPress(123)" onmouseup="emulatorKeyRelease(123)" />
-                <area shape="rect" coords="431,056,473,083" alt="0132" href="javascript:void(0)" onmousedown="emulatorKeyPress(90)" onmouseup="emulatorKeyRelease(90)" />
+                <area shape="rect" coords="018,056,046,083" alt="0006" href="javascript:void(0)" onmousedown="emulatorKeyPress(6)" onmouseup="emulatorKeyRelease(6)"/>
+                <area shape="rect" coords="047,056,075,083" alt="0007" href="javascript:void(0)" onmousedown="emulatorKeyPress(7)" onmouseup="emulatorKeyRelease(7)"/>
+                <area shape="rect" coords="077,056,104,083" alt="0030" href="javascript:void(0)" onmousedown="emulatorKeyPress(24)" onmouseup="emulatorKeyRelease(24)"/>
+                <area shape="rect" coords="106,056,134,083" alt="0031" href="javascript:void(0)" onmousedown="emulatorKeyPress(25)" onmouseup="emulatorKeyRelease(25)"/>
+                <area shape="rect" coords="136,056,163,083" alt="0032" href="javascript:void(0)" onmousedown="emulatorKeyPress(26)" onmouseup="emulatorKeyRelease(26)"/>
+                <area shape="rect" coords="165,056,193,083" alt="0013" href="javascript:void(0)" onmousedown="emulatorKeyPress(11)" onmouseup="emulatorKeyRelease(11)"/>
+                <area shape="rect" coords="195,056,222,083" alt="0034" href="javascript:void(0)" onmousedown="emulatorKeyPress(28)" onmouseup="emulatorKeyRelease(28)"/>
+                <area shape="rect" coords="224,056,252,083" alt="0035" href="javascript:void(0)" onmousedown="emulatorKeyPress(29)" onmouseup="emulatorKeyRelease(29)"/>
+                <area shape="rect" coords="254,056,281,083" alt="0016" href="javascript:void(0)" onmousedown="emulatorKeyPress(14)" onmouseup="emulatorKeyRelease(14)"/>
+                <area shape="rect" coords="283,056,311,083" alt="0017" href="javascript:void(0)" onmousedown="emulatorKeyPress(15)" onmouseup="emulatorKeyRelease(15)"/>
+                <area shape="rect" coords="313,056,340,083" alt="0177" href="javascript:void(0)" onmousedown="emulatorKeyPress(127)" onmouseup="emulatorKeyRelease(127)"/>
+                <area shape="rect" coords="342,056,370,083" alt="0176" href="javascript:void(0)" onmousedown="emulatorKeyPress(126)" onmouseup="emulatorKeyRelease(126)"/>
+                <area shape="rect" coords="372,056,399,083" alt="0175" href="javascript:void(0)" onmousedown="emulatorKeyPress(125)" onmouseup="emulatorKeyRelease(125)"/>
+                <area shape="rect" coords="401,056,429,083" alt="0173" href="javascript:void(0)" onmousedown="emulatorKeyPress(123)" onmouseup="emulatorKeyRelease(123)"/>
+                <area shape="rect" coords="431,056,473,083" alt="0132" href="javascript:void(0)" onmousedown="emulatorKeyPress(90)" onmouseup="emulatorKeyRelease(90)"/>
                 <!-- 2nd row -->
-                <area shape="rect" coords="018,086,060,113" alt="0026" href="javascript:void(0)" onmousedown="emulatorKeyPress(22)" onmouseup="emulatorKeyRelease(22)" />
-                <area shape="rect" coords="062,086,089,113" alt="0027" href="javascript:void(0)" onmousedown="emulatorKeyPress(23)" onmouseup="emulatorKeyRelease(23)" />
-                <area shape="rect" coords="091,086,119,113" alt="0050" href="javascript:void(0)" onmousedown="emulatorKeyPress(40)" onmouseup="emulatorKeyRelease(40)" />
-                <area shape="rect" coords="121,086,148,113" alt="0051" href="javascript:void(0)" onmousedown="emulatorKeyPress(41)" onmouseup="emulatorKeyRelease(41)" />
-                <area shape="rect" coords="150,086,178,113" alt="0052" href="javascript:void(0)" onmousedown="emulatorKeyPress(42)" onmouseup="emulatorKeyRelease(42)" />
-                <area shape="rect" coords="180,086,207,113" alt="0033" href="javascript:void(0)" onmousedown="emulatorKeyPress(27)" onmouseup="emulatorKeyRelease(27)" />
-                <area shape="rect" coords="210,086,238,113" alt="0054" href="javascript:void(0)" onmousedown="emulatorKeyPress(44)" onmouseup="emulatorKeyRelease(44)" />
-                <area shape="rect" coords="239,086,266,113" alt="0055" href="javascript:void(0)" onmousedown="emulatorKeyPress(45)" onmouseup="emulatorKeyRelease(45)" />
-                <area shape="rect" coords="269,086,296,113" alt="0036" href="javascript:void(0)" onmousedown="emulatorKeyPress(30)" onmouseup="emulatorKeyRelease(30)" />
-                <area shape="rect" coords="298,086,326,113" alt="0037" href="javascript:void(0)" onmousedown="emulatorKeyPress(31)" onmouseup="emulatorKeyRelease(31)" />
-                <area shape="rect" coords="328,086,355,113" alt="0157" href="javascript:void(0)" onmousedown="emulatorKeyPress(111)" onmouseup="emulatorKeyRelease(111)" />
-                <area shape="rect" coords="357,086,385,113" alt="0156" href="javascript:void(0)" onmousedown="emulatorKeyPress(110)" onmouseup="emulatorKeyRelease(110)" />
-                <area shape="rect" coords="387,086,414,113" alt="0155" href="javascript:void(0)" onmousedown="emulatorKeyPress(109)" onmouseup="emulatorKeyRelease(109)" />
-                <area shape="rect" coords="416,086,444,113" alt="0174" href="javascript:void(0)" onmousedown="emulatorKeyPress(124)" onmouseup="emulatorKeyRelease(124)" />
+                <area shape="rect" coords="018,086,060,113" alt="0026" href="javascript:void(0)" onmousedown="emulatorKeyPress(22)" onmouseup="emulatorKeyRelease(22)"/>
+                <area shape="rect" coords="062,086,089,113" alt="0027" href="javascript:void(0)" onmousedown="emulatorKeyPress(23)" onmouseup="emulatorKeyRelease(23)"/>
+                <area shape="rect" coords="091,086,119,113" alt="0050" href="javascript:void(0)" onmousedown="emulatorKeyPress(40)" onmouseup="emulatorKeyRelease(40)"/>
+                <area shape="rect" coords="121,086,148,113" alt="0051" href="javascript:void(0)" onmousedown="emulatorKeyPress(41)" onmouseup="emulatorKeyRelease(41)"/>
+                <area shape="rect" coords="150,086,178,113" alt="0052" href="javascript:void(0)" onmousedown="emulatorKeyPress(42)" onmouseup="emulatorKeyRelease(42)"/>
+                <area shape="rect" coords="180,086,207,113" alt="0033" href="javascript:void(0)" onmousedown="emulatorKeyPress(27)" onmouseup="emulatorKeyRelease(27)"/>
+                <area shape="rect" coords="210,086,238,113" alt="0054" href="javascript:void(0)" onmousedown="emulatorKeyPress(44)" onmouseup="emulatorKeyRelease(44)"/>
+                <area shape="rect" coords="239,086,266,113" alt="0055" href="javascript:void(0)" onmousedown="emulatorKeyPress(45)" onmouseup="emulatorKeyRelease(45)"/>
+                <area shape="rect" coords="269,086,296,113" alt="0036" href="javascript:void(0)" onmousedown="emulatorKeyPress(30)" onmouseup="emulatorKeyRelease(30)"/>
+                <area shape="rect" coords="298,086,326,113" alt="0037" href="javascript:void(0)" onmousedown="emulatorKeyPress(31)" onmouseup="emulatorKeyRelease(31)"/>
+                <area shape="rect" coords="328,086,355,113" alt="0157" href="javascript:void(0)" onmousedown="emulatorKeyPress(111)" onmouseup="emulatorKeyRelease(111)"/>
+                <area shape="rect" coords="357,086,385,113" alt="0156" href="javascript:void(0)" onmousedown="emulatorKeyPress(110)" onmouseup="emulatorKeyRelease(110)"/>
+                <area shape="rect" coords="387,086,414,113" alt="0155" href="javascript:void(0)" onmousedown="emulatorKeyPress(109)" onmouseup="emulatorKeyRelease(109)"/>
+                <area shape="rect" coords="416,086,444,113" alt="0174" href="javascript:void(0)" onmousedown="emulatorKeyPress(124)" onmouseup="emulatorKeyRelease(124)"/>
 
                 <!-- Enter -->
-                <area shape="poly" coords="431,116,446,116,446,86,473,86,473,142,431,142" alt="0153" href="javascript:void(0)" onmousedown="emulatorKeyPress(107)" onmouseup="emulatorKeyRelease(107)" />
+                <area shape="poly" coords="431,116,446,116,446,86,473,86,473,142,431,142" alt="0153" href="javascript:void(0)" onmousedown="emulatorKeyPress(107)" onmouseup="emulatorKeyRelease(107)"/>
 
                 <!-- Arrows -->
-                <area shape="rect" coords="387,145,414,201" alt="0116" href="javascript:void(0)" onmousedown="emulatorKeyPress(78)" onmouseup="emulatorKeyRelease(78)" />
-                <area shape="rect" coords="416,145,444,172" alt="0154" href="javascript:void(0)" onmousedown="emulatorKeyPress(108)" onmouseup="emulatorKeyRelease(108)" />
-                <area shape="rect" coords="416,174,444,201" alt="0134" href="javascript:void(0)" onmousedown="emulatorKeyPress(92)" onmouseup="emulatorKeyRelease(92)" />
-                <area shape="rect" coords="446,145,473,201" alt="0133" href="javascript:void(0)" onmousedown="emulatorKeyPress(91)" onmouseup="emulatorKeyRelease(91)" />
+                <area shape="rect" coords="387,145,414,201" alt="0116" href="javascript:void(0)" onmousedown="emulatorKeyPress(78)" onmouseup="emulatorKeyRelease(78)"/>
+                <area shape="rect" coords="416,145,444,172" alt="0154" href="javascript:void(0)" onmousedown="emulatorKeyPress(108)" onmouseup="emulatorKeyRelease(108)"/>
+                <area shape="rect" coords="416,174,444,201" alt="0134" href="javascript:void(0)" onmousedown="emulatorKeyPress(92)" onmouseup="emulatorKeyRelease(92)"/>
+                <area shape="rect" coords="446,145,473,201" alt="0133" href="javascript:void(0)" onmousedown="emulatorKeyPress(91)" onmouseup="emulatorKeyRelease(91)"/>
 
             </map>
         </div>
@@ -352,6 +370,11 @@
             },
             emulatorDetachFloppy : function(slot) {
                 Module.ccall('Emulator_DetachFloppyImage', null, ['number'], [slot]);
+            },
+            emulatorLoadImage : function(data) {
+                Module['FS_createDataFile']('/', 'image', data, true, true, true);
+                Module.ccall('Emulator_LoadImage', null, null, null);
+                this.drawScreen();
             }
         };
 
@@ -428,8 +451,8 @@
                 Module.emulatorAttachFloppy(slot, dataarr);
 
                 fileInput.value = '';
-                fileInput.style.display = 'none';
                 document.getElementById('labelmz' + slot).innerText = file.name;
+                document.getElementById('attachmz' + slot).style.display = 'none';
                 document.getElementById('detachmz' + slot).style.display = 'inline';
             };
             fr.readAsArrayBuffer(file);
@@ -438,11 +461,30 @@
         function emulatorDetachFloppy(button, slot) {
             Module.emulatorDetachFloppy(slot);
 
-            button.style.display = 'none';
             document.getElementById('labelmz' + slot).innerText = '';
-            document.getElementById('filemz' + slot).style.display = 'inline';
+            document.getElementById('attachmz' + slot).style.display = 'inline';
+            document.getElementById('detachmz' + slot).style.display = 'none';
         }
 
+        function emulatorLoadImage(fileInput) {
+            if (emulatorStarted)
+                emulatorStart();  // Stop
+
+            if (fileInput.files.length == 0)
+                return;
+            var file = fileInput.files[0];
+            if (file.size > 229888)
+                return;
+
+            var fr = new FileReader();
+            fr.onload = function () {
+                var dataarr = new Uint8Array(fr.result);
+                Module.emulatorLoadImage(dataarr);
+
+                fileInput.value = '';
+            };
+            fr.readAsArrayBuffer(file);
+        }
     </script>
     <script async type="text/javascript" src="emul.js"></script>
 </body>
