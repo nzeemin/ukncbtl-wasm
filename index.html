@@ -15,6 +15,7 @@
             max-width: 100%;
             overflow-x: hidden;
             margin: 0;
+            background-color: #f6f8fa;
         }
 
         .emscripten {
@@ -198,7 +199,7 @@
                     <input type="button" id="detachmz3" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 3);"/>
                 </div>
                 <div style="white-space: nowrap">
-                    <input id="fileimg" type="file" onchange="emulatorLoadImage(this);" style="display: none" />
+                    <input id="fileimg" type="file" onchange="emulatorLoadState(this);" style="display: none" />
                     <input type="button" id="loadimg" value="Load State" onclick="document.getElementById('fileimg').click();" />
                 </div>
             </div>
@@ -277,6 +278,43 @@
                 }
             ],
             postRun: [
+                function () {
+                    // Load disks if specified
+                    for (var slot = 0; slot < 4; slot++) {
+                        var paramDisk = getParameterByName('disk' + slot);
+                        if (paramDisk && paramDisk.substr(0, 4) == 'http') {
+                            console.log('Loading disk ' + slot.toString() + ' image from ' + paramDisk);
+                            var data = loadBinaryResource(paramDisk);
+                            if (!data || data.length > 819200) {
+                                console.log('Failed to download the disk image from ' + paramDisk);
+                                return;
+                            }
+                            Module.emulatorAttachFloppy(slot, data);
+                            document.getElementById('labelmz' + slot).innerText = '???.dsk';
+                            document.getElementById('attachmz' + slot).style.display = 'none';
+                            document.getElementById('detachmz' + slot).style.display = 'inline';
+                        }
+                    }
+                    // Load saved state if specified
+                    var paramState = getParameterByName('state');
+                    if (paramState && paramState.substr(0, 4) == 'http') {
+                        console.log('Loading state from ' + paramState);
+                        var data = loadBinaryResource(paramState);
+                        if (!data || data.length != 229888) {
+                            console.log('Failed to download the state image from ' + paramState);
+                            return;
+                        }
+                        Module.emulatorLoadImage(data);
+                    }
+                    // Autorun & bootup
+                    var paramAutorun = getParameterByName('run');
+                    var paramBoot = getParameterByName('boot');
+                    if (paramBoot)
+                        emulatorReset();
+                    if (paramAutorun || paramBoot)
+                        emulatorStart();
+                    //TODO: boot
+                }
             ],
             print: (function () {
                 var element = document.getElementById('output');
@@ -387,7 +425,17 @@
             };
         };
 
-        function load_binary_resource(url) {
+        function getParameterByName(name) {
+            var url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        function loadBinaryResource(url) {
             var byteArray = [];
             var req = new XMLHttpRequest();
             req.open('GET', url, false);
@@ -466,7 +514,7 @@
             document.getElementById('detachmz' + slot).style.display = 'none';
         }
 
-        function emulatorLoadImage(fileInput) {
+        function emulatorLoadState(fileInput) {
             if (emulatorStarted)
                 emulatorStart();  // Stop
 
