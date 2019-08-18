@@ -113,7 +113,7 @@ void ScreenView_ProcessKeyboard()
 extern "C" {
 #endif
 
-    void EMSCRIPTEN_KEEPALIVE Emulator_Init()
+    EMSCRIPTEN_KEEPALIVE void Emulator_Init()
     {
         printf("Emulator_Init()\n");
 
@@ -136,29 +136,29 @@ extern "C" {
         g_okEmulatorInitialized = true;
     }
 
-    uint32_t EMSCRIPTEN_KEEPALIVE Emulator_GetUptime()
+    EMSCRIPTEN_KEEPALIVE uint32_t Emulator_GetUptime()
     {
         return m_dwEmulatorUptime;
     }
 
-    uint16_t EMSCRIPTEN_KEEPALIVE Emulator_GetReg()
+    EMSCRIPTEN_KEEPALIVE uint16_t Emulator_GetReg()
     {
         return g_pBoard->GetPPU()->GetPC();
     }
 
-    void EMSCRIPTEN_KEEPALIVE Emulator_Start()
+    EMSCRIPTEN_KEEPALIVE void Emulator_Start()
     {
         printf("Emulator_Start()\n");
 
         g_okEmulatorRunning = true;
     }
-    void EMSCRIPTEN_KEEPALIVE Emulator_Stop()
+    EMSCRIPTEN_KEEPALIVE void Emulator_Stop()
     {
         printf("Emulator_Stop()\n");
 
         g_okEmulatorRunning = false;
     }
-    void EMSCRIPTEN_KEEPALIVE Emulator_Reset()
+    EMSCRIPTEN_KEEPALIVE void Emulator_Reset()
     {
         printf("Emulator_Reset()\n");
 
@@ -167,7 +167,7 @@ extern "C" {
         g_pBoard->Reset();
     }
 
-    void EMSCRIPTEN_KEEPALIVE Emulator_DetachFloppyImage(int slot)
+    EMSCRIPTEN_KEEPALIVE void Emulator_DetachFloppyImage(int slot)
     {
         g_pBoard->DetachFloppyImage(slot);
 
@@ -182,7 +182,7 @@ extern "C" {
         remove(buffer);
     }
 
-    void EMSCRIPTEN_KEEPALIVE Emulator_AttachFloppyImage(int slot)
+    EMSCRIPTEN_KEEPALIVE void Emulator_AttachFloppyImage(int slot)
     {
         char buffer[6];
         buffer[0] = '/';
@@ -203,7 +203,7 @@ extern "C" {
         g_pBoard->AttachFloppyImage(slot, buffer);
     }
 
-    void EMSCRIPTEN_KEEPALIVE Emulator_SystemFrame()
+    EMSCRIPTEN_KEEPALIVE void Emulator_SystemFrame()
     {
         //printf("Emulator_SystemFrame()\n");
 
@@ -226,7 +226,7 @@ extern "C" {
         }
     }
 
-    void* EMSCRIPTEN_KEEPALIVE Emulator_PrepareScreen()
+    EMSCRIPTEN_KEEPALIVE void* Emulator_PrepareScreen()
     {
         //printf("Emulator_PrepareScreen()\n");
         if (g_pFrameBuffer == 0)
@@ -237,13 +237,13 @@ extern "C" {
         return g_pFrameBuffer;
     }
 
-    void EMSCRIPTEN_KEEPALIVE Emulator_KeyEvent(uint8_t keyscan, bool pressed)
+    EMSCRIPTEN_KEEPALIVE void Emulator_KeyEvent(uint8_t keyscan, bool pressed)
     {
         //printf("Emulator_KeyEvent(%04o, %d)\n", keyscan, pressed);
         ScreenView_PutKeyEventToQueue(uint16_t(keyscan) | (pressed ? 0x8000 : 0));
     }
 
-    void EMSCRIPTEN_KEEPALIVE Emulator_LoadImage()
+    EMSCRIPTEN_KEEPALIVE void Emulator_LoadImage()
     {
         const char * imageFileName = "/image";
 
