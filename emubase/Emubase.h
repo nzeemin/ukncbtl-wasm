@@ -1,4 +1,4 @@
-/*  This file is part of UKNCBTL.
+﻿/*  This file is part of UKNCBTL.
     UKNCBTL is free software: you can redistribute it and/or modify it under the terms
 of the GNU Lesser General Public License as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -112,7 +112,7 @@ public:
     /// \brief Detach image from the drive -- remove disk
     void DetachImage(int drive);
     /// \brief Check if the drive has an image attached
-    bool IsAttached(int drive) const { return (m_drivedata[drive].fpFile != NULL); }
+    bool IsAttached(int drive) const { return (m_drivedata[drive].fpFile != nullptr); }
     /// \brief Check if the drive's attached image is read-only
     bool IsReadOnly(int drive) const { return m_drivedata[drive].okReadOnly; }
     /// \brief Check if floppy engine now rotates
@@ -127,7 +127,6 @@ public:
 private:
     void PrepareTrack();
     void FlushChanges();  ///< If current track was changed - save it
-
 };
 
 

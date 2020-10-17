@@ -15,6 +15,14 @@ UKNCBTL. If not, see <http://www.gnu.org/licenses/>. */
 #include <emscripten/emscripten.h>
 
 
+// DebugPrint and DebugLog
+void DebugPrint(LPCTSTR) {}
+void DebugPrintFormat(LPCTSTR, ...) {}
+void DebugLogClear() {}
+void DebugLogCloseFile() {}
+void DebugLog(LPCTSTR) {}
+void DebugLogFormat(LPCTSTR, ...) {}
+
 
 void Emulator_PrepareScreenRGB32(void* pBits, const uint32_t* colors);
 
@@ -50,8 +58,6 @@ CMotherboard* g_pBoard = NULL;
 bool g_okEmulatorInitialized = false;
 bool g_okEmulatorRunning = false;
 
-uint16_t m_wEmulatorCPUBreakpoint = 0177777;
-uint16_t m_wEmulatorPPUBreakpoint = 0177777;
 
 bool m_okEmulatorSound = false;
 
@@ -209,8 +215,8 @@ extern "C" {
 
         //SoundGen_SetVolume(Settings_GetSoundVolume());
 
-        g_pBoard->SetCPUBreakpoint(m_wEmulatorCPUBreakpoint);
-        g_pBoard->SetPPUBreakpoint(m_wEmulatorPPUBreakpoint);
+        g_pBoard->SetCPUBreakpoints(nullptr);
+        g_pBoard->SetPPUBreakpoints(nullptr);
 
         ScreenView_ProcessKeyboard();
 

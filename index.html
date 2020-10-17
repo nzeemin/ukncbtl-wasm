@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>WASM Test</title>
+    <title>UKNCBTL WASM</title>
     <style>
         html {
             overflow-y: scroll;
@@ -15,7 +15,7 @@
             max-width: 100%;
             overflow-x: hidden;
             margin: 0;
-            background-color: #f6f8fa;
+            background-color: #f0f0f0;
         }
 
         .emscripten {
@@ -26,19 +26,17 @@
         }
 
         div.emupanel {
-            width: 640px;
+            width: 660px;
             margin-left: auto;
             margin-right: auto;
             border: none;
             border-collapse: collapse;
-            background-color: #f0f0f0;
         }
 
         div.emupanel-toolbar {
             /*width: 100%;*/
             text-align: left;
             padding: 4px;
-            background-color: #f0f0f0;
         }
 
         span.emupanel-registers {
@@ -47,30 +45,52 @@
 
         div.emupanel-main {
             position: relative;
-            width: 640px;
+            width: 660px;
             padding: 0;
             padding-top: 0;
             display: block;
-            background-color: #f0f0f0;
             /*text-align: center;*/
         }
 
-        div.emupanel-controls {
+        div.emupanel-left {
             position: absolute;
-            right: 640px;
-            background-color: #f0f0f0;
+            right: 660px;
             padding: 8px;
             font-family: monospace;
             width: 100px;
             text-align: center;
         }
 
+        div.emupanel-left .command-button {
+            width: 94px;
+        }
+
+        div.emupanel-title {
+            font-family: Tahoma;
+            font-weight: bold;
+            /*text-shadow: 2px 4px 3px rgba(0,0,0,0.2);*/
+            padding-bottom: 12px;
+        }
+
         div.emupanel-disks {
+            padding-bottom: 8px;
+            font-family: monospace;
+        }
+
+        div.emupanel-right {
             position: absolute;
-            left: 640px;
-            background-color: #f0f0f0;
+            left: 660px;
             padding: 8px;
             font-family: monospace;
+        }
+
+        div.emupanel-canvas {
+            padding: 7px;
+            background-color: #202020;
+            border-left: solid 3px #606060;
+            border-right: solid 3px #C0C0C0;
+            border-top: solid 3px #606060;
+            border-bottom: solid 3px #C0C0C0;
         }
 
         /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
@@ -94,6 +114,7 @@
             height: 150px;
             margin: 4px;
             padding: 0 0 0 0;
+            display: none;
         }
 
         .spinner {
@@ -162,48 +183,53 @@
 
     <div class="emupanel">
         <div class="emupanel-main">
-            <div class="emupanel-controls">
-                <input id="buttonStart" type="button" value="Run" onclick="emulatorStart()" style="width: 60px;">
-                <input type="button" value="Reset" onclick="Module.emulatorReset()" style="width: 60px;">
+            <div class="emupanel-left">
+                <div class="emupanel-title">
+                    UKNCBTL
+                </div>
+                <input id="buttonStart" type="button" class="command-button" value="Run" onclick="emulatorStart()">
+                <input type="button" class="command-button" value="Reset" onclick="Module.emulatorReset()">
                 <!--<input type="button" value="Frame" onclick="Module.systemFrame()">-->
                 <!--<input type="button" value="25 Frames" onclick="emulatorSystemFrame25()">-->
                 <!--<input type="button" value="Draw Screen" onclick="Module.drawScreen()">-->
-                <div class="emupanel-registers">
-                    <div id="register" style="white-space: nowrap"></div>
-                    <div id="uptime" style="white-space: nowrap"></div>
-                </div>
-            </div>
-            <div class="emupanel-disks">
-                <div style="white-space: nowrap">
-                    MZ0: <label id="labelmz0"></label>
-                    <input id="filemz0" type="file" onchange="emulatorAttachFileInput(this, 0);" style="display: none"/>
-                    <input type="button" id="attachmz0" value="Attach" onclick="document.getElementById('filemz0').click();" />
-                    <input type="button" id="detachmz0" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 0);"/>
-                </div>
-                <div style="white-space: nowrap">
-                    MZ1: <label id="labelmz1"></label>
-                    <input id="filemz1" type="file" onchange="emulatorAttachFileInput(this, 1);" style="display: none"/>
-                    <input type="button" id="attachmz1" value="Attach" onclick="document.getElementById('filemz1').click();" />
-                    <input type="button" id="detachmz1" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 1);"/>
-                </div>
-                <div style="white-space: nowrap">
-                    MZ2: <label id="labelmz2"></label>
-                    <input id="filemz2" type="file" onchange="emulatorAttachFileInput(this, 2);" style="display: none"/>
-                    <input type="button" id="attachmz2" value="Attach" onclick="document.getElementById('filemz2').click();" />
-                    <input type="button" id="detachmz2" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 2);"/>
-                </div>
-                <div style="white-space: nowrap">
-                    MZ3: <label id="labelmz3"></label>
-                    <input id="filemz3" type="file" onchange="emulatorAttachFileInput(this, 3);" style="display: none"/>
-                    <input type="button" id="attachmz3" value="Attach" onclick="document.getElementById('filemz3').click();" />
-                    <input type="button" id="detachmz3" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 3);"/>
-                </div>
-                <div style="white-space: nowrap">
+                <div style="white-space: nowrap; margin-top: 8px;">
                     <input id="fileimg" type="file" onchange="emulatorLoadState(this);" style="display: none" />
-                    <input type="button" id="loadimg" value="Load State" onclick="document.getElementById('fileimg').click();" />
+                    <input type="button" id="loadimg" class="command-button" value="Load State" onclick="document.getElementById('fileimg').click();" />
+                </div>
+                <div id="uptime" style="white-space: nowrap; margin-top: 8px;"></div>
+            </div>
+            <div class="emupanel-right">
+                <div class="emupanel-disks">
+                    Disks:
+                    <div style="white-space: nowrap">
+                        MZ0: <label id="labelmz0"></label>
+                        <input id="filemz0" type="file" onchange="emulatorAttachFileInput(this, 0);" style="display: none"/>
+                        <input type="button" id="attachmz0" value="Attach" onclick="document.getElementById('filemz0').click();" />
+                        <input type="button" id="detachmz0" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 0);"/>
+                    </div>
+                    <div style="white-space: nowrap">
+                        MZ1: <label id="labelmz1"></label>
+                        <input id="filemz1" type="file" onchange="emulatorAttachFileInput(this, 1);" style="display: none"/>
+                        <input type="button" id="attachmz1" value="Attach" onclick="document.getElementById('filemz1').click();" />
+                        <input type="button" id="detachmz1" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 1);"/>
+                    </div>
+                    <div style="white-space: nowrap">
+                        MZ2: <label id="labelmz2"></label>
+                        <input id="filemz2" type="file" onchange="emulatorAttachFileInput(this, 2);" style="display: none"/>
+                        <input type="button" id="attachmz2" value="Attach" onclick="document.getElementById('filemz2').click();" />
+                        <input type="button" id="detachmz2" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 2);"/>
+                    </div>
+                    <div style="white-space: nowrap">
+                        MZ3: <label id="labelmz3"></label>
+                        <input id="filemz3" type="file" onchange="emulatorAttachFileInput(this, 3);" style="display: none"/>
+                        <input type="button" id="attachmz3" value="Attach" onclick="document.getElementById('filemz3').click();" />
+                        <input type="button" id="detachmz3" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 3);"/>
+                    </div>
                 </div>
             </div>
-            <canvas class="emscripten" id="canvas" width="640" height="288" oncontextmenu="event.preventDefault()" style="height: 480px;"></canvas>
+            <div class="emupanel-canvas">
+                <canvas class="emscripten" id="canvas" width="640" height="288" oncontextmenu="event.preventDefault()" style="height: 480px;"></canvas>
+            </div>
             <div class="emupanel-keyboard">
                 <img src="keyboard.png" width="610" height="212" usemap="#keyboard" alt=""/>
             </div>
@@ -398,7 +424,7 @@
             systemFrame: function () {
                 Module.ccall('Emulator_SystemFrame', null, null, null);
                 var regval = Module.ccall('Emulator_GetReg', 'number', null, null);
-                document.getElementById('register').innerText = 'PC ' + (regval < 0 ? regval + 65536 : regval).toString(8);
+                //document.getElementById('register').innerText = 'PC ' + (regval < 0 ? regval + 65536 : regval).toString(8);
             },
             emulatorAttachFloppy : function(slot, data) {
                 //console.log('emulatorAttachFloppy', data);

@@ -11,7 +11,7 @@
    typedef signed short int    int16_t;
    typedef unsigned int        uint32_t;
    typedef signed int          int32_t;
-   typedef unsigned long int   uint64_t;
+   typedef unsigned long long  uint64_t;
 
 
 #define MAKELONG(a, b)      ((uint16_t)(((uint16_t)(((uint32_t)(a)) & 0xffff)) | ((uint32_t)((uint16_t)(((uint32_t)(b)) & 0xffff))) << 16))
@@ -35,6 +35,15 @@ typedef const char * LPCTSTR;
 
 #define ASSERT(f)          ((void)0)
 #define VERIFY(f)          ((void)f)
+
+
+// DebugPrint and DebugLog
+void DebugPrint(LPCTSTR message);
+void DebugPrintFormat(LPCTSTR pszFormat, ...);
+void DebugLogClear();
+void DebugLogCloseFile();
+void DebugLog(LPCTSTR message);
+void DebugLogFormat(LPCTSTR pszFormat, ...);
 
 
 // Processor register names

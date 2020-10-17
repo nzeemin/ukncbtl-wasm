@@ -1,4 +1,4 @@
-/*  This file is part of UKNCBTL.
+п»ї/*  This file is part of UKNCBTL.
     UKNCBTL is free software: you can redistribute it and/or modify it under the terms
 of the GNU Lesser General Public License as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -57,7 +57,7 @@ uint16_t CLR_TIMING[8] =
     0x000B, 0x001C, 0x0023, 0x002F, 0x0023, 0x002F, 0x002F, 0x003F
 };
 
-uint16_t CRLB_TIMING[8] =
+uint16_t CLRB_TIMING[8] =
 {
     0x000B, 0x0021, 0x0027, 0x0033, 0x0027, 0x0033, 0x0037, 0x0043
 };
@@ -79,13 +79,13 @@ uint16_t XOR_TIMING[8] =
 
 uint16_t ASH_TIMING[8] =
 {
-    0x0029,	0x003D, 0x003D, 0x0049, 0x0041, 0x004D, 0x0055, 0x0062
+    0x0029, 0x003D, 0x003D, 0x0049, 0x0041, 0x004D, 0x0055, 0x0062
 };
 uint16_t ASH_S_TIMING = 0x0008;
 
 uint16_t ASHC_TIMING[8] =
 {
-    0x0039, 0x004E, 0x004D, 0x005A, 0x0051, 0x005D, 0x0066,	0x0072
+    0x0039, 0x004E, 0x004D, 0x005A, 0x0051, 0x005D, 0x0066, 0x0072
 };
 uint16_t ASHC_S_TIMING = 0x0008;
 
@@ -96,12 +96,12 @@ uint16_t MUL_TIMING[8] =
 
 uint16_t DIV_TIMING[8] =
 {
-    0x0080, 0x00E8, 0x00E7, 0x00F4, 0x00EB, 0x00F8,	0x0100,	0x010D
+    0x0080, 0x00E8, 0x00E7, 0x00F4, 0x00EB, 0x00F8, 0x0100, 0x010D
 };
 
 uint16_t JMP_TIMING[7] =
 {
-    0x002D, 0x002D, 0x003D, 0x002D, 0x003D, 0x0031,	0x0041
+    0x002D, 0x002D, 0x003D, 0x002D, 0x003D, 0x0031, 0x0041
 };
 uint16_t JSR_TIMING[7] =
 {
@@ -119,26 +119,26 @@ uint16_t SOB_TIMING = 0x002D;
 uint16_t SOB_LAST_TIMING = 0x0019; //last iteration of SOB
 uint16_t BR_TIMING = 0x0025;
 uint16_t MARK_TIMING = 0x0041;
-uint16_t RESET_TIMING = 105 + 968;  // ТО КМ1801ВМ2 стр. 134
+uint16_t RESET_TIMING = 105 + 968;  // РўРћ РљРњ1801Р’Рњ2 СЃС‚СЂ. 134
 
 
 //////////////////////////////////////////////////////////////////////
 
 
-CProcessor::ExecuteMethodRef* CProcessor::m_pExecuteMethodMap = NULL;
+CProcessor::ExecuteMethodRef* CProcessor::m_pExecuteMethodMap = nullptr;
 
 #define RegisterMethodRef(/*uint16_t*/ opstart, /*uint16_t*/ opend, /*CProcessor::ExecuteMethodRef*/ methodref) \
-	{ \
-		for (uint32_t opcode = (opstart); opcode <= (opend); opcode++) \
-			m_pExecuteMethodMap[opcode] = (methodref); \
-	}
+    { \
+        for (uint32_t opcode = (opstart); opcode <= (opend); opcode++) \
+            m_pExecuteMethodMap[opcode] = (methodref); \
+    }
 
 void CProcessor::Init()
 {
-    ASSERT(m_pExecuteMethodMap == NULL);
-    m_pExecuteMethodMap = (CProcessor::ExecuteMethodRef*) ::malloc(sizeof(CProcessor::ExecuteMethodRef) * 65536);
+    ASSERT(m_pExecuteMethodMap == nullptr);
+    m_pExecuteMethodMap = static_cast<CProcessor::ExecuteMethodRef*>(::calloc(65536, sizeof(CProcessor::ExecuteMethodRef)));
 
-    // Сначала заполняем таблицу ссылками на метод ExecuteUNKNOWN, выполняющий TRAP 10
+    // РЎРЅР°С‡Р°Р»Р° Р·Р°РїРѕР»РЅСЏРµРј С‚Р°Р±Р»РёС†Сѓ СЃСЃС‹Р»РєР°РјРё РЅР° РјРµС‚РѕРґ ExecuteUNKNOWN, РІС‹РїРѕР»РЅСЏСЋС‰РёР№ TRAP 10
     RegisterMethodRef( 0000000, 0177777, &CProcessor::ExecuteUNKNOWN );
 
     RegisterMethodRef( 0000000, 0000000, &CProcessor::ExecuteHALT );
@@ -248,7 +248,7 @@ void CProcessor::Init()
 
 void CProcessor::Done()
 {
-    ::free(m_pExecuteMethodMap);  m_pExecuteMethodMap = NULL;
+    ::free(m_pExecuteMethodMap);  m_pExecuteMethodMap = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -262,7 +262,7 @@ CProcessor::CProcessor (LPCTSTR name)
     m_savepc = 0177777;
     m_okStopped = true;
     m_internalTick = 0;
-    m_pMemoryController = NULL;
+    m_pMemoryController = nullptr;
     m_waitmode = false;
     m_stepmode = false;
     m_buserror = false;
@@ -343,7 +343,7 @@ bool CProcessor::InterruptProcessing ()
             intrVector = 0010;  intrMode = true;
             m_FIS_rq = false;
         }
-        else if (m_RPLYrq)  // Зависание, priority 1
+        else if (m_RPLYrq)  // Р—Р°РІРёСЃР°РЅРёРµ, priority 1
         {
             if (m_buserror)
             {
@@ -537,7 +537,7 @@ void CProcessor::MemoryError()
 
 void CProcessor::FetchInstruction()
 {
-    // Считываем очередную инструкцию
+    // РЎС‡РёС‚С‹РІР°РµРј РѕС‡РµСЂРµРґРЅСѓСЋ РёРЅСЃС‚СЂСѓРєС†РёСЋ
     uint16_t pc = GetPC();
     ASSERT((pc & 1) == 0); // it have to be word aligned
 
@@ -558,11 +558,9 @@ void CProcessor::TranslateInstruction ()
     (this->*methodref)();  // Call command implementation method
 }
 
-void CProcessor::ExecuteUNKNOWN ()  // Нет такой инструкции - просто вызывается TRAP 10
+void CProcessor::ExecuteUNKNOWN ()  // РќРµС‚ С‚Р°РєРѕР№ РёРЅСЃС‚СЂСѓРєС†РёРё - РїСЂРѕСЃС‚Рѕ РІС‹Р·С‹РІР°РµС‚СЃСЏ TRAP 10
 {
-//#if !defined(PRODUCT)
 //    DebugPrintFormat(_T(">>Invalid OPCODE = %06o @ %06o\r\n"), m_instruction, GetPC()-2);
-//#endif
 
     m_RSVDrq = true;
 }
@@ -575,21 +573,21 @@ void CProcessor::ExecuteWAIT ()  // WAIT - Wait for an interrupt
     m_waitmode = true;
 }
 
-void CProcessor::ExecuteSTEP()  // ШАГ
+void CProcessor::ExecuteSTEP()  // РЁРђР“
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
         m_RSVDrq = true;
     else
     {
-        SetPC(m_savepc);        // СК <- КРСК
-        SetPSW(m_savepsw);      // РСП(8:0) <- КРСП(8:0)
+        SetPC(m_savepc);        // РЎРљ <- РљР РЎРљ
+        SetPSW(m_savepsw);      // Р РЎРџ(8:0) <- РљР РЎРџ(8:0)
         m_stepmode = true;
     }
 }
 
-void CProcessor::ExecuteRSEL()  // RSEL / ЧПТ - Чтение безадресного регистра
+void CProcessor::ExecuteRSEL()  // RSEL / Р§РџРў - Р§С‚РµРЅРёРµ Р±РµР·Р°РґСЂРµСЃРЅРѕРіРѕ СЂРµРіРёСЃС‚СЂР°
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
         m_RSVDrq = true;
     else
     {
@@ -599,24 +597,24 @@ void CProcessor::ExecuteRSEL()  // RSEL / ЧПТ - Чтение безадресного регистра
 
 void CProcessor::Execute000030()  // Unknown command
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
     {
         m_RSVDrq = true;
         return;
     }
 
-    // Описание: По этой команде сперва очищается регистр R0. Далее исполняется цикл, окончанием которого
-    //           является установка в разряде 07 R0 или R2 единицы. В цикле над регистрами проводятся
-    //           следующие действия: регистры с R1 по R3 сдвигаются влево, при этом в R1 в младший разряд
-    //           вдвигается ноль, а в R2 и R3 – содержимое разряда C, при этом старшая часть R2 расширяется
-    //           знаковым разрядом младшей части, R0 инкрементируется. Так как останов исполнения команды
-    //           производится при наличии единицы в разряде 7 в R0 или R2, то после исполнения команды R0
-    //           может принимать значения от 0 до 108 или 2008. Значение 2008 получается в том случае,
-    //           если до исполнения операции младшая часть R2 была равна нулю и был сброшен бит С.
-    // Признаки: N – очищается,
-    //           Z – устанавливается, если значение в R0 равно нулю, в противном случае очищается,
-    //           V – очищается,
-    //           C – очищается.
+    // РћРїРёСЃР°РЅРёРµ: РџРѕ СЌС‚РѕР№ РєРѕРјР°РЅРґРµ СЃРїРµСЂРІР° РѕС‡РёС‰Р°РµС‚СЃСЏ СЂРµРіРёСЃС‚СЂ R0. Р”Р°Р»РµРµ РёСЃРїРѕР»РЅСЏРµС‚СЃСЏ С†РёРєР», РѕРєРѕРЅС‡Р°РЅРёРµРј РєРѕС‚РѕСЂРѕРіРѕ
+    //           СЏРІР»СЏРµС‚СЃСЏ СѓСЃС‚Р°РЅРѕРІРєР° РІ СЂР°Р·СЂСЏРґРµ 07 R0 РёР»Рё R2 РµРґРёРЅРёС†С‹. Р’ С†РёРєР»Рµ РЅР°Рґ СЂРµРіРёСЃС‚СЂР°РјРё РїСЂРѕРІРѕРґСЏС‚СЃСЏ
+    //           СЃР»РµРґСѓСЋС‰РёРµ РґРµР№СЃС‚РІРёСЏ: СЂРµРіРёСЃС‚СЂС‹ СЃ R1 РїРѕ R3 СЃРґРІРёРіР°СЋС‚СЃСЏ РІР»РµРІРѕ, РїСЂРё СЌС‚РѕРј РІ R1 РІ РјР»Р°РґС€РёР№ СЂР°Р·СЂСЏРґ
+    //           РІРґРІРёРіР°РµС‚СЃСЏ РЅРѕР»СЊ, Р° РІ R2 Рё R3 вЂ“ СЃРѕРґРµСЂР¶РёРјРѕРµ СЂР°Р·СЂСЏРґР° C, РїСЂРё СЌС‚РѕРј СЃС‚Р°СЂС€Р°СЏ С‡Р°СЃС‚СЊ R2 СЂР°СЃС€РёСЂСЏРµС‚СЃСЏ
+    //           Р·РЅР°РєРѕРІС‹Рј СЂР°Р·СЂСЏРґРѕРј РјР»Р°РґС€РµР№ С‡Р°СЃС‚Рё, R0 РёРЅРєСЂРµРјРµРЅС‚РёСЂСѓРµС‚СЃСЏ. РўР°Рє РєР°Рє РѕСЃС‚Р°РЅРѕРІ РёСЃРїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹
+    //           РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ РїСЂРё РЅР°Р»РёС‡РёРё РµРґРёРЅРёС†С‹ РІ СЂР°Р·СЂСЏРґРµ 7 РІ R0 РёР»Рё R2, С‚Рѕ РїРѕСЃР»Рµ РёСЃРїРѕР»РЅРµРЅРёСЏ РєРѕРјР°РЅРґС‹ R0
+    //           РјРѕР¶РµС‚ РїСЂРёРЅРёРјР°С‚СЊ Р·РЅР°С‡РµРЅРёСЏ РѕС‚ 0 РґРѕ 108 РёР»Рё 2008. Р—РЅР°С‡РµРЅРёРµ 2008 РїРѕР»СѓС‡Р°РµС‚СЃСЏ РІ С‚РѕРј СЃР»СѓС‡Р°Рµ,
+    //           РµСЃР»Рё РґРѕ РёСЃРїРѕР»РЅРµРЅРёСЏ РѕРїРµСЂР°С†РёРё РјР»Р°РґС€Р°СЏ С‡Р°СЃС‚СЊ R2 Р±С‹Р»Р° СЂР°РІРЅР° РЅСѓР»СЋ Рё Р±С‹Р» СЃР±СЂРѕС€РµРЅ Р±РёС‚ РЎ.
+    // РџСЂРёР·РЅР°РєРё: N вЂ“ РѕС‡РёС‰Р°РµС‚СЃСЏ,
+    //           Z вЂ“ СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ, РµСЃР»Рё Р·РЅР°С‡РµРЅРёРµ РІ R0 СЂР°РІРЅРѕ РЅСѓР»СЋ, РІ РїСЂРѕС‚РёРІРЅРѕРј СЃР»СѓС‡Р°Рµ РѕС‡РёС‰Р°РµС‚СЃСЏ,
+    //           V вЂ“ РѕС‡РёС‰Р°РµС‚СЃСЏ,
+    //           C вЂ“ РѕС‡РёС‰Р°РµС‚СЃСЏ.
 
     SetReg(0, 0);
     while ((GetReg(0) & 0200) == 0 && (GetReg(2) & 0200) == 0)
@@ -636,71 +634,71 @@ void CProcessor::Execute000030()  // Unknown command
 void CProcessor::ExecuteFIS()  // Floating point instruction set: FADD, FSUB, FMUL, FDIV
 {
     if (GetMemoryController()->GetSelRegister() & 0200)  // bit 7 set?
-        m_RSVDrq = true;  // Программа эмуляции FIS отсутствует, прерывание по резервному коду
+        m_RSVDrq = true;  // РџСЂРѕРіСЂР°РјРјР° СЌРјСѓР»СЏС†РёРё FIS РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚, РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ СЂРµР·РµСЂРІРЅРѕРјСѓ РєРѕРґСѓ
     else
-        m_FIS_rq = true;  // Прерывание обработки FIS
+        m_FIS_rq = true;  // РџСЂРµСЂС‹РІР°РЅРёРµ РѕР±СЂР°Р±РѕС‚РєРё FIS
 }
 
-void CProcessor::ExecuteRUN()  // ПУСК / START
+void CProcessor::ExecuteRUN()  // РџРЈРЎРљ / START
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
         m_RSVDrq = true;
     else
     {
-        SetPC(m_savepc);        // СК <- КРСК
-        SetPSW(m_savepsw);      // РСП(8:0) <- КРСП(8:0)
+        SetPC(m_savepc);        // РЎРљ <- РљР РЎРљ
+        SetPSW(m_savepsw);      // Р РЎРџ(8:0) <- РљР РЎРџ(8:0)
     }
 }
 
-void CProcessor::ExecuteHALT ()  // HALT - Останов
+void CProcessor::ExecuteHALT ()  // HALT - РћСЃС‚Р°РЅРѕРІ
 {
     m_HALTrq = true;
 }
 
-void CProcessor::ExecuteRCPC()  // ЧКСК - Чтение регистра копии счётчика команд
+void CProcessor::ExecuteRCPC()  // Р§РљРЎРљ - Р§С‚РµРЅРёРµ СЂРµРіРёСЃС‚СЂР° РєРѕРїРёРё СЃС‡С‘С‚С‡РёРєР° РєРѕРјР°РЅРґ
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
         m_RSVDrq = true;
     else
     {
-        SetReg(0, m_savepc);        // R0 <- КРСК
+        SetReg(0, m_savepc);        // R0 <- РљР РЎРљ
         m_internalTick = NOP_TIMING;
     }
 }
-void CProcessor::ExecuteRCPS()  // ЧКСП - Чтение регистра копии слова состояния процессора
+void CProcessor::ExecuteRCPS()  // Р§РљРЎРџ - Р§С‚РµРЅРёРµ СЂРµРіРёСЃС‚СЂР° РєРѕРїРёРё СЃР»РѕРІР° СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРѕС†РµСЃСЃРѕСЂР°
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
         m_RSVDrq = true;
     else
     {
-        SetReg(0, m_savepsw);       // R0 <- КРСП
+        SetReg(0, m_savepsw);       // R0 <- РљР РЎРџ
         m_internalTick = NOP_TIMING;
     }
 }
-void CProcessor::ExecuteWCPC()  // ЗКСК - Запись регистра копии счётчика команд
+void CProcessor::ExecuteWCPC()  // Р—РљРЎРљ - Р—Р°РїРёСЃСЊ СЂРµРіРёСЃС‚СЂР° РєРѕРїРёРё СЃС‡С‘С‚С‡РёРєР° РєРѕРјР°РЅРґ
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
         m_RSVDrq = true;
     else
     {
-        m_savepc = GetReg(0);       // КРСК <- R0
+        m_savepc = GetReg(0);       // РљР РЎРљ <- R0
         m_internalTick = NOP_TIMING;
     }
 }
-void CProcessor::ExecuteWCPS()  // ЗКСП - Запись регистра копии слова состояния процессора
+void CProcessor::ExecuteWCPS()  // Р—РљРЎРџ - Р—Р°РїРёСЃСЊ СЂРµРіРёСЃС‚СЂР° РєРѕРїРёРё СЃР»РѕРІР° СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРѕС†РµСЃСЃРѕСЂР°
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
         m_RSVDrq = true;
     else
     {
-        m_savepsw = GetReg(0);      // КРСП <- R0
+        m_savepsw = GetReg(0);      // РљР РЎРџ <- R0
         m_internalTick = NOP_TIMING;
     }
 }
 
-void CProcessor::ExecuteMFUS ()  // ЧЧП, move from user space - Чтение памяти адресного пространства USER
+void CProcessor::ExecuteMFUS ()  // Р§Р§Рџ, move from user space - Р§С‚РµРЅРёРµ РїР°РјСЏС‚Рё Р°РґСЂРµСЃРЅРѕРіРѕ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР° USER
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
     {
         m_RSVDrq = true;
         return;
@@ -712,14 +710,14 @@ void CProcessor::ExecuteMFUS ()  // ЧЧП, move from user space - Чтение памяти ад
     uint16_t word = GetWord(addr);  // Read in USER mode
     SetHALT(true);
     SetReg(5, addr + 2);
-    if (!m_RPLYrq) 	SetReg(0, word);
+    if (!m_RPLYrq)  SetReg(0, word);
 
     m_internalTick = MOV_TIMING[0][2];
 }
 
-void CProcessor::ExecuteMTUS()  // ЗЧП, move to user space - Запись в память адресного пространства USER
+void CProcessor::ExecuteMTUS()  // Р—Р§Рџ, move to user space - Р—Р°РїРёСЃСЊ РІ РїР°РјСЏС‚СЊ Р°РґСЂРµСЃРЅРѕРіРѕ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІР° USER
 {
-    if ((m_psw & PSW_HALT) == 0)  // Эта команда выполняется только в режиме HALT
+    if ((m_psw & PSW_HALT) == 0)  // Р­С‚Р° РєРѕРјР°РЅРґР° РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ HALT
     {
         m_RSVDrq = true;
         return;
@@ -734,7 +732,7 @@ void CProcessor::ExecuteMTUS()  // ЗЧП, move to user space - Запись в память адр
     m_internalTick = MOV_TIMING[0][2];
 }
 
-void CProcessor::ExecuteRTI()  // RTI - Return from Interrupt - Возврат из прерывания
+void CProcessor::ExecuteRTI()  // RTI - Return from Interrupt - Р’РѕР·РІСЂР°С‚ РёР· РїСЂРµСЂС‹РІР°РЅРёСЏ
 {
     uint16_t word;
     word = GetWord(GetSP());
@@ -751,7 +749,7 @@ void CProcessor::ExecuteRTI()  // RTI - Return from Interrupt - Возврат из преры
     m_internalTick = RTI_TIMING;
 }
 
-void CProcessor::ExecuteRTT ()  // RTT - Return from Trace Trap -- Возврат из прерывания
+void CProcessor::ExecuteRTT ()  // RTT - Return from Trace Trap -- Р’РѕР·РІСЂР°С‚ РёР· РїСЂРµСЂС‹РІР°РЅРёСЏ
 {
     uint16_t word;
     word = GetWord(GetSP());
@@ -783,7 +781,7 @@ void CProcessor::ExecuteIOT ()  // IOT - I/O trap
     m_internalTick = EMT_TIMING;
 }
 
-void CProcessor::ExecuteRESET ()  // Reset input/output devices -- Сброс внешних устройств
+void CProcessor::ExecuteRESET ()  // Reset input/output devices -- РЎР±СЂРѕСЃ РІРЅРµС€РЅРёС… СѓСЃС‚СЂРѕР№СЃС‚РІ
 {
     m_EVNTrq = false;
     m_pMemoryController->ResetDevices();  // INIT signal
@@ -791,7 +789,7 @@ void CProcessor::ExecuteRESET ()  // Reset input/output devices -- Сброс внешних
     m_internalTick = RESET_TIMING;
 }
 
-void CProcessor::ExecuteRTS ()  // RTS - return from subroutine - Возврат из процедуры
+void CProcessor::ExecuteRTS ()  // RTS - return from subroutine - Р’РѕР·РІСЂР°С‚ РёР· РїСЂРѕС†РµРґСѓСЂС‹
 {
     uint16_t word;
     SetPC(GetReg(m_regdest));
@@ -815,7 +813,7 @@ void CProcessor::ExecuteSCC ()
 
 void CProcessor::ExecuteJMP ()  // JMP - jump: PC = &d (a-mode > 0)
 {
-    if (m_methdest == 0)  // Неправильный метод адресации
+    if (m_methdest == 0)  // РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ РјРµС‚РѕРґ Р°РґСЂРµСЃР°С†РёРё
     {
         m_ILLGrq = true;
         m_internalTick = EMT_TIMING;
@@ -929,7 +927,7 @@ void CProcessor::ExecuteCOM()  // COM
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
-void CProcessor::ExecuteCOMB ()  // COM
+void CProcessor::ExecuteCOMB()  // COM
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -960,7 +958,7 @@ void CProcessor::ExecuteCOMB ()  // COM
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteINC ()  // INC - Инкремент
+void CProcessor::ExecuteINC()  // INC - РРЅРєСЂРµРјРµРЅС‚
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -990,7 +988,7 @@ void CProcessor::ExecuteINC ()  // INC - Инкремент
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
-void CProcessor::ExecuteINCB ()  // INCB - Инкремент
+void CProcessor::ExecuteINCB()  // INCB - РРЅРєСЂРµРјРµРЅС‚
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -1021,7 +1019,7 @@ void CProcessor::ExecuteINCB ()  // INCB - Инкремент
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteDEC ()  // DEC - Декремент
+void CProcessor::ExecuteDEC()  // DEC - Р”РµРєСЂРµРјРµРЅС‚
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -1051,7 +1049,8 @@ void CProcessor::ExecuteDEC ()  // DEC - Декремент
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
-void CProcessor::ExecuteDECB ()  // DEC - Декремент
+
+void CProcessor::ExecuteDECB ()  // DECB - Р”РµРєСЂРµРјРµРЅС‚
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -1082,7 +1081,7 @@ void CProcessor::ExecuteDECB ()  // DEC - Декремент
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteNEG ()
+void CProcessor::ExecuteNEG()
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1113,6 +1112,7 @@ void CProcessor::ExecuteNEG ()
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
+
 void CProcessor::ExecuteNEGB ()
 {
     uint16_t ea = 0;
@@ -1145,7 +1145,7 @@ void CProcessor::ExecuteNEGB ()
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteADC ()
+void CProcessor::ExecuteADC()
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1176,7 +1176,8 @@ void CProcessor::ExecuteADC ()
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
-void CProcessor::ExecuteADCB ()  // ADCB
+
+void CProcessor::ExecuteADCB()  // ADCB
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1208,7 +1209,7 @@ void CProcessor::ExecuteADCB ()  // ADCB
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteSBC ()
+void CProcessor::ExecuteSBC()
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1239,7 +1240,8 @@ void CProcessor::ExecuteSBC ()
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
-void CProcessor::ExecuteSBCB ()
+
+void CProcessor::ExecuteSBCB()
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1271,7 +1273,7 @@ void CProcessor::ExecuteSBCB ()
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteTST ()  // TST only, see also ExecuteTSTB()
+void CProcessor::ExecuteTST()  // TST
 {
     uint8_t new_psw = GetLPSW() & 0xF0;
     uint16_t dst;
@@ -1292,7 +1294,7 @@ void CProcessor::ExecuteTST ()  // TST only, see also ExecuteTSTB()
     m_internalTick = TST_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteTSTB ()  // TSTB only, see also ExecuteTST()
+void CProcessor::ExecuteTSTB()  // TSTB
 {
     uint8_t new_psw = GetLPSW() & 0xF0;
     uint8_t dst;
@@ -1313,7 +1315,7 @@ void CProcessor::ExecuteTSTB ()  // TSTB only, see also ExecuteTST()
     m_internalTick = TST_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteROR ()  // ROR
+void CProcessor::ExecuteROR()  // ROR
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1344,7 +1346,8 @@ void CProcessor::ExecuteROR ()  // ROR
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
-void CProcessor::ExecuteRORB ()  // RORB
+
+void CProcessor::ExecuteRORB()  // RORB
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1376,7 +1379,7 @@ void CProcessor::ExecuteRORB ()  // RORB
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteROL ()  // ROL
+void CProcessor::ExecuteROL()  // ROL
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1407,7 +1410,8 @@ void CProcessor::ExecuteROL ()  // ROL
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
-void CProcessor::ExecuteROLB ()  // ROLB
+
+void CProcessor::ExecuteROLB()  // ROLB
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1439,7 +1443,7 @@ void CProcessor::ExecuteROLB ()  // ROLB
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteASR ()  // ASR
+void CProcessor::ExecuteASR()  // ASR
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1470,7 +1474,8 @@ void CProcessor::ExecuteASR ()  // ASR
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
-void CProcessor::ExecuteASRB ()  // ASRB
+
+void CProcessor::ExecuteASRB()  // ASRB
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1502,7 +1507,7 @@ void CProcessor::ExecuteASRB ()  // ASRB
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteASL ()  // ASL
+void CProcessor::ExecuteASL()  // ASL
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1533,7 +1538,8 @@ void CProcessor::ExecuteASL ()  // ASL
     SetLPSW(new_psw);
     m_internalTick = CLR_TIMING[m_methdest];
 }
-void CProcessor::ExecuteASLB ()  // ASLB
+
+void CProcessor::ExecuteASLB()  // ASLB
 {
     uint16_t ea = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -1565,7 +1571,7 @@ void CProcessor::ExecuteASLB ()  // ASLB
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteSXT ()  // SXT - sign-extend
+void CProcessor::ExecuteSXT()  // SXT - sign-extend
 {
     uint8_t new_psw = GetLPSW() & 0xF9;
     if (m_methdest)
@@ -1583,7 +1589,7 @@ void CProcessor::ExecuteSXT ()  // SXT - sign-extend
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteMTPS ()  // MTPS - move to PS
+void CProcessor::ExecuteMTPS()  // MTPS - move to PS
 {
     uint8_t dst;
     if (m_methdest)
@@ -1601,7 +1607,7 @@ void CProcessor::ExecuteMTPS ()  // MTPS - move to PS
     m_internalTick = MTPS_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteMFPS ()  // MFPS - move from PS
+void CProcessor::ExecuteMFPS()  // MFPS - move from PS
 {
     uint8_t psw = GetLPSW();
     uint8_t new_psw = psw & 0xF1;
@@ -1624,13 +1630,13 @@ void CProcessor::ExecuteMFPS ()  // MFPS - move from PS
     m_internalTick = CLR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteBR ()
+void CProcessor::ExecuteBR()
 {
     SetPC(GetPC() + ((short)(char)(uint8_t)(m_instruction & 0xff)) * 2 );
     m_internalTick = BR_TIMING;
 }
 
-void CProcessor::ExecuteBNE ()
+void CProcessor::ExecuteBNE()
 {
     if (GetZ())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1641,7 +1647,7 @@ void CProcessor::ExecuteBNE ()
     }
 }
 
-void CProcessor::ExecuteBEQ ()
+void CProcessor::ExecuteBEQ()
 {
     if (!GetZ())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1652,7 +1658,7 @@ void CProcessor::ExecuteBEQ ()
     }
 }
 
-void CProcessor::ExecuteBGE ()
+void CProcessor::ExecuteBGE()
 {
     if (GetN() != GetV())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1663,7 +1669,7 @@ void CProcessor::ExecuteBGE ()
     }
 }
 
-void CProcessor::ExecuteBLT ()
+void CProcessor::ExecuteBLT()
 {
     if (GetN() == GetV())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1674,7 +1680,7 @@ void CProcessor::ExecuteBLT ()
     }
 }
 
-void CProcessor::ExecuteBGT ()
+void CProcessor::ExecuteBGT()
 {
     if ((GetN() != GetV()) || GetZ())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1685,7 +1691,7 @@ void CProcessor::ExecuteBGT ()
     }
 }
 
-void CProcessor::ExecuteBLE ()
+void CProcessor::ExecuteBLE()
 {
     if (! ((GetN() != GetV()) || GetZ()))
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1696,7 +1702,7 @@ void CProcessor::ExecuteBLE ()
     }
 }
 
-void CProcessor::ExecuteBPL ()
+void CProcessor::ExecuteBPL()
 {
     if (GetN())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1707,7 +1713,7 @@ void CProcessor::ExecuteBPL ()
     }
 }
 
-void CProcessor::ExecuteBMI ()
+void CProcessor::ExecuteBMI()
 {
     if (!GetN())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1718,7 +1724,7 @@ void CProcessor::ExecuteBMI ()
     }
 }
 
-void CProcessor::ExecuteBHI ()
+void CProcessor::ExecuteBHI()
 {
     if (GetZ() || GetC())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1729,7 +1735,7 @@ void CProcessor::ExecuteBHI ()
     }
 }
 
-void CProcessor::ExecuteBLOS ()
+void CProcessor::ExecuteBLOS()
 {
     if (!(GetZ() || GetC()))
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1740,7 +1746,7 @@ void CProcessor::ExecuteBLOS ()
     }
 }
 
-void CProcessor::ExecuteBVC ()
+void CProcessor::ExecuteBVC()
 {
     if (GetV())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1751,7 +1757,7 @@ void CProcessor::ExecuteBVC ()
     }
 }
 
-void CProcessor::ExecuteBVS ()
+void CProcessor::ExecuteBVS()
 {
     if (!GetV())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1762,7 +1768,7 @@ void CProcessor::ExecuteBVS ()
     }
 }
 
-void CProcessor::ExecuteBHIS ()
+void CProcessor::ExecuteBHIS()
 {
     if (GetC())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1773,7 +1779,7 @@ void CProcessor::ExecuteBHIS ()
     }
 }
 
-void CProcessor::ExecuteBLO ()
+void CProcessor::ExecuteBLO()
 {
     if (!GetC())
         m_internalTick = BRANCH_FALSE_TIMING;
@@ -1784,7 +1790,7 @@ void CProcessor::ExecuteBLO ()
     }
 }
 
-void CProcessor::ExecuteXOR ()  // XOR
+void CProcessor::ExecuteXOR()  // XOR
 {
     uint16_t dst;
     uint16_t ea = 0;
@@ -1814,7 +1820,7 @@ void CProcessor::ExecuteXOR ()  // XOR
     m_internalTick = XOR_TIMING[m_methdest];
 }
 
-void CProcessor::ExecuteMUL ()  // MUL
+void CProcessor::ExecuteMUL()  // MUL - multiply
 {
     uint16_t dst = GetReg(m_regsrc);
     uint16_t src, ea = 0;
@@ -1837,7 +1843,8 @@ void CProcessor::ExecuteMUL ()  // MUL
     SetLPSW(new_psw);
     m_internalTick = MUL_TIMING[m_methdest];
 }
-void CProcessor::ExecuteDIV ()  // DIV
+
+void CProcessor::ExecuteDIV()  // DIV - divide
 {
     uint16_t ea = 0;
     int32_t longsrc;
@@ -1855,13 +1862,13 @@ void CProcessor::ExecuteDIV ()  // DIV
 
     if (src2 == 0)
     {
-        new_psw |= (PSW_V | PSW_C); //если делят на 0 -- то устанавливаем V и C
+        new_psw |= (PSW_V | PSW_C); //РµСЃР»Рё РґРµР»СЏС‚ РЅР° 0 -- С‚Рѕ СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј V Рё C
         SetLPSW(new_psw);
         return;
     }
-    if ((longsrc == 020000000000) && (src2 == -1))
+    if ((longsrc == (int32_t)020000000000) && (src2 == -1))
     {
-        new_psw |= PSW_V; // переполняемся, товарищи
+        new_psw |= PSW_V; // РїРµСЂРµРїРѕР»РЅСЏРµРјСЃСЏ, С‚РѕРІР°СЂРёС‰Рё
         SetLPSW(new_psw);
         return;
     }
@@ -1871,7 +1878,7 @@ void CProcessor::ExecuteDIV ()  // DIV
 
     if ((res > 32767) || (res < -32768))
     {
-        new_psw |= PSW_V; // переполняемся, товарищи
+        new_psw |= PSW_V; // РїРµСЂРµРїРѕР»РЅСЏРµРјСЃСЏ, С‚РѕРІР°СЂРёС‰Рё
         SetLPSW(new_psw);
         return;
     }
@@ -1883,7 +1890,8 @@ void CProcessor::ExecuteDIV ()  // DIV
     if (res == 0) new_psw |= PSW_Z;
     SetLPSW(new_psw);
 }
-void CProcessor::ExecuteASH ()  // ASH
+
+void CProcessor::ExecuteASH()  // ASH - arithmetic shift
 {
     uint16_t ea = 0;
     short src;
@@ -1926,7 +1934,8 @@ void CProcessor::ExecuteASH ()  // ASH
     if (dst == 0) new_psw |= PSW_Z;
     SetLPSW(new_psw);
 }
-void CProcessor::ExecuteASHC ()  // ASHC
+
+void CProcessor::ExecuteASHC()  // ASHC - arithmetic shift combined
 {
     uint16_t ea = 0;
     int16_t src;
@@ -1971,7 +1980,7 @@ void CProcessor::ExecuteASHC ()  // ASHC
     SetLPSW(new_psw);
 }
 
-void CProcessor::ExecuteSOB ()  // SOB - subtract one: R = R - 1 ; if R != 0 : PC = PC - 2*nn
+void CProcessor::ExecuteSOB()  // SOB - subtract one: R = R - 1 ; if R != 0 : PC = PC - 2*nn
 {
     uint16_t dst = GetReg(m_regsrc);
 
@@ -1986,7 +1995,7 @@ void CProcessor::ExecuteSOB ()  // SOB - subtract one: R = R - 1 ; if R != 0 : P
     }
 }
 
-void CProcessor::ExecuteMOV ()  // MOV only, see also ExecuteMOVB()
+void CProcessor::ExecuteMOV()  // MOV - move
 {
     uint16_t src_addr, dst_addr;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -2018,7 +2027,7 @@ void CProcessor::ExecuteMOV ()  // MOV only, see also ExecuteMOVB()
     m_internalTick = MOV_TIMING[m_methsrc][m_methdest];
 }
 
-void CProcessor::ExecuteMOVB ()  // MOVB only, see also ExecuteMOV()
+void CProcessor::ExecuteMOVB()  // MOVB - move byte
 {
     uint16_t src_addr, dst_addr;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -2052,7 +2061,7 @@ void CProcessor::ExecuteMOVB ()  // MOVB only, see also ExecuteMOV()
     m_internalTick = MOVB_TIMING[m_methsrc][m_methdest];
 }
 
-void CProcessor::ExecuteCMP ()
+void CProcessor::ExecuteCMP()  // CMP - compare
 {
     uint16_t src_addr, dst_addr;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -2083,10 +2092,6 @@ void CProcessor::ExecuteCMP ()
 
     dst = src - src2;
 
-    //SetN( CheckForNegative ((uint16_t)(src - src2)) );
-    //SetZ( CheckForZero ((uint16_t)(src - src2)) );
-    //SetV( CheckSubForOverflow (src, src2) );
-    //SetC( CheckSubForCarry (src, src2) );
     if (dst & 0100000) new_psw |= PSW_N;
     if (dst == 0) new_psw |= PSW_Z;
     if (((src ^ src2) & ~(dst ^ src2)) & 0100000) new_psw |= PSW_V;
@@ -2095,7 +2100,7 @@ void CProcessor::ExecuteCMP ()
     m_internalTick = CMP_TIMING[m_methsrc][m_methdest];
 }
 
-void CProcessor::ExecuteCMPB ()
+void CProcessor::ExecuteCMPB()  // CMPB - compare byte
 {
     uint16_t src_addr, dst_addr;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -2125,10 +2130,7 @@ void CProcessor::ExecuteCMPB ()
         src2 = GetLReg(m_regdest);
 
     dst = src - src2;
-    //SetN( CheckForNegative((uint8_t)(src - src2)) );
-    //SetZ( CheckForZero((uint8_t)(src - src2)) );
-    //SetV( CheckSubForOverflow (src, src2) );
-    //SetC( CheckSubForCarry (src, src2) );
+
     if (dst & 0200) new_psw |= PSW_N;
     if (dst == 0) new_psw |= PSW_Z;
     if (((src ^ src2) & ~(dst ^ src2)) & 0200) new_psw |= PSW_V;
@@ -2137,7 +2139,7 @@ void CProcessor::ExecuteCMPB ()
     m_internalTick = CMP_TIMING[m_methsrc][m_methdest];
 }
 
-void CProcessor::ExecuteBIT ()  // BIT - bit test
+void CProcessor::ExecuteBIT()  // BIT - bit test
 {
     uint16_t src_addr, dst_addr;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -2172,7 +2174,8 @@ void CProcessor::ExecuteBIT ()  // BIT - bit test
     SetLPSW(new_psw);
     m_internalTick = CMP_TIMING[m_methsrc][m_methdest];
 }
-void CProcessor::ExecuteBITB ()  // BITB - bit test
+
+void CProcessor::ExecuteBITB()  // BITB - bit test on byte
 {
     uint16_t src_addr, dst_addr;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -2249,7 +2252,8 @@ void CProcessor::ExecuteBIC()  // BIC - bit clear
     SetLPSW(new_psw);
     m_internalTick = MOV_TIMING[m_methsrc][m_methdest];
 }
-void CProcessor::ExecuteBICB ()  // BICB - bit clear
+
+void CProcessor::ExecuteBICB()  // BICB - bit clear
 {
     uint16_t src_addr, dst_addr = 0;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -2333,7 +2337,8 @@ void CProcessor::ExecuteBIS()  // BIS - bit set
     SetLPSW(new_psw);
     m_internalTick = MOV_TIMING[m_methsrc][m_methdest];
 }
-void CProcessor::ExecuteBISB ()  // BISB - bit set
+
+void CProcessor::ExecuteBISB()  // BISB - bit set on byte
 {
     uint16_t src_addr, dst_addr = 0;
     uint8_t new_psw = GetLPSW() & 0xF1;
@@ -2375,7 +2380,7 @@ void CProcessor::ExecuteBISB ()  // BISB - bit set
     m_internalTick = MOVB_TIMING[m_methsrc][m_methdest];
 }
 
-void CProcessor::ExecuteADD ()  // ADD
+void CProcessor::ExecuteADD()  // ADD
 {
     uint16_t src_addr, dst_addr = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -2417,7 +2422,7 @@ void CProcessor::ExecuteADD ()  // ADD
     m_internalTick = MOVB_TIMING[m_methsrc][m_methdest];
 }
 
-void CProcessor::ExecuteSUB ()
+void CProcessor::ExecuteSUB()  // SUB
 {
     uint16_t src_addr, dst_addr = 0;
     uint8_t new_psw = GetLPSW() & 0xF0;
@@ -2459,23 +2464,23 @@ void CProcessor::ExecuteSUB ()
     m_internalTick = MOVB_TIMING[m_methsrc][m_methdest];
 }
 
-void CProcessor::ExecuteEMT ()  // EMT - emulator trap
+void CProcessor::ExecuteEMT()  // EMT - emulator trap
 {
     m_EMT_rq = true;
     m_internalTick = EMT_TIMING;
 }
 
-void CProcessor::ExecuteTRAP ()
+void CProcessor::ExecuteTRAP()
 {
     m_TRAPrq = true;
     m_internalTick = EMT_TIMING;
 }
 
-void CProcessor::ExecuteJSR ()  // JSR - Jump subroutine: *--SP = R; R = PC; PC = &d (a-mode > 0)
+void CProcessor::ExecuteJSR()  // JSR - jump subroutine: *--SP = R; R = PC; PC = &d (a-mode > 0)
 {
     if (m_methdest == 0)
     {
-        // Неправильный метод адресации
+        // РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ РјРµС‚РѕРґ Р°РґСЂРµСЃР°С†РёРё
         m_ILLGrq = true;
         m_internalTick = EMT_TIMING;
     }
@@ -2522,7 +2527,7 @@ void CProcessor::ExecuteMARK ()  // MARK
 void CProcessor::SaveToImage(uint8_t* pImage) const
 {
     // Processor data                               // Offset Size
-    uint16_t* pwImage = (uint16_t*) pImage;                 //    0    --
+    uint16_t* pwImage = (uint16_t*) pImage;         //    0    --
     *pwImage++ = m_psw;                             //    0     2   PSW
     memcpy(pwImage, m_R, 2 * 8);  pwImage += 8;     //    2    16   Registers R0-R7
     *pwImage++ = m_savepc;                          //   18     2   PC'
@@ -2564,7 +2569,7 @@ void CProcessor::SaveToImage(uint8_t* pImage) const
 
 void CProcessor::LoadFromImage(const uint8_t* pImage)
 {
-    const uint16_t* pwImage = (const uint16_t*) pImage;     //    0    --
+    const uint16_t* pwImage = (const uint16_t*) pImage;  //    0    --
     m_psw = *pwImage++;                             //    0     2   PSW
     memcpy(m_R, pwImage, 2 * 8);  pwImage += 8;     //    2    16   Registers R0-R7
     m_savepc    = *pwImage++;                       //   18     2   PC'
@@ -2603,46 +2608,48 @@ void CProcessor::LoadFromImage(const uint8_t* pImage)
 
 uint16_t CProcessor::GetWordAddr (uint8_t meth, uint8_t reg)
 {
-    uint16_t addr;
-
-    addr = 0;
-
     switch (meth)
     {
     case 1:   //(R)
-        addr = GetReg(reg);
-        break;
+        return GetReg(reg);
     case 2:   //(R)+
-        addr = GetReg(reg);
-        SetReg(reg, addr + 2);
-        break;
+        {
+            uint16_t addr = GetReg(reg);
+            SetReg(reg, addr + 2);
+            return addr;
+        }
     case 3:  //@(R)+
-        addr = GetReg(reg);
-        SetReg(reg, addr + 2);
-        addr = GetWord(addr);
-        break;
+        {
+            uint16_t addr = GetReg(reg);
+            SetReg(reg, addr + 2);
+            return GetWord(addr);
+        }
     case 4: //-(R)
         SetReg(reg, GetReg(reg) - 2);
-        addr = GetReg(reg);
-        break;
+        return GetReg(reg);
     case 5: //@-(R)
-        SetReg(reg, GetReg(reg) - 2);
-        addr = GetReg(reg);
-        addr = GetWord(addr);
-        break;
+        {
+            SetReg(reg, GetReg(reg) - 2);
+            uint16_t addr = GetReg(reg);
+            return GetWord(addr);
+        }
     case 6: //d(R)
-        addr = GetWord(GetPC());
-        SetPC(GetPC() + 2);
-        addr = GetReg(reg) + addr;
-        break;
+        {
+            uint16_t addr = GetWord(GetPC());
+            SetPC(GetPC() + 2);
+            return GetReg(reg) + addr;
+        }
     case 7: //@d(r)
-        addr = GetWord(GetPC());
-        SetPC(GetPC() + 2);
-        addr = GetReg(reg) + addr;
-        if (!m_RPLYrq) addr = GetWord(addr);
-        break;
+        {
+            uint16_t addr = GetWord(GetPC());
+            SetPC(GetPC() + 2);
+            addr = GetReg(reg) + addr;
+            if (!m_RPLYrq)
+                return GetWord(addr);
+            return addr;
+        }
     }
-    return addr;
+    return 0;
 }
 
 uint16_t CProcessor::GetByteAddr (uint8_t meth, uint8_t reg)

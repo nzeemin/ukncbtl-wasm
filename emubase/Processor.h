@@ -1,4 +1,4 @@
-/*  This file is part of UKNCBTL.
+﻿/*  This file is part of UKNCBTL.
     UKNCBTL is free software: you can redistribute it and/or modify it under the terms
 of the GNU Lesser General Public License as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -23,7 +23,6 @@ class CMemoryController;
 /// \brief KM1801VM2 processor
 class CProcessor
 {
-
 public:  // Constructor / initialization
     CProcessor(LPCTSTR name);
     /// \brief Link the processor and memory controller
@@ -135,6 +134,8 @@ public:  // Processor control
     bool        InterruptProcessing();
     /// \brief Execute next command and process interrupts
     void        CommandExecution();
+    int         GetInternalTick() const { return m_internalTick; }
+    void        ClearInternalTick() { m_internalTick = 0; }
 
 public:  // Saving/loading emulator status (pImage addresses up to 32 bytes)
     void        SaveToImage(uint8_t* pImage) const;
@@ -145,9 +146,9 @@ protected:  // Implementation
     void        TranslateInstruction();  ///< Execute the instruction
 protected:  // Implementation - memory access
     /// \brief Read word from the bus for execution
-    uint16_t    GetWordExec(uint16_t address) { return m_pMemoryController->GetWordExec(address, IsHaltMode()); }
+    uint16_t    GetWordExec(uint16_t address) { return m_pMemoryController->GetWord(address, IsHaltMode(), true); }
     /// \brief Read word from the bus
-    uint16_t    GetWord(uint16_t address) { return m_pMemoryController->GetWord(address, IsHaltMode()); }
+    uint16_t    GetWord(uint16_t address) { return m_pMemoryController->GetWord(address, IsHaltMode(), false); }
     void        SetWord(uint16_t address, uint16_t word) { m_pMemoryController->SetWord(address, IsHaltMode(), word); }
     uint8_t     GetByte(uint16_t address) { return m_pMemoryController->GetByte(address, IsHaltMode()); }
     void        SetByte(uint16_t address, uint8_t byte) { m_pMemoryController->SetByte(address, IsHaltMode(), byte); }
@@ -174,21 +175,21 @@ protected:  // Implementation - instruction execution
     void        ExecuteUNKNOWN ();  ///< There is no such instruction -- just call TRAP 10
     void        ExecuteHALT ();
     void        ExecuteWAIT ();
-    void        ExecuteRCPC	();
+    void        ExecuteRCPC();
     void        ExecuteRCPS ();
-    void        ExecuteWCPC	();
-    void        ExecuteWCPS	();
+    void        ExecuteWCPC();
+    void        ExecuteWCPS();
     void        ExecuteMFUS ();
     void        ExecuteMTUS ();
     void        ExecuteRTI ();
     void        ExecuteBPT ();
     void        ExecuteIOT ();
     void        ExecuteRESET ();
-    void        ExecuteSTEP	();
+    void        ExecuteSTEP();
     void        ExecuteRSEL ();
     void        Execute000030 ();
     void        ExecuteFIS ();
-    void        ExecuteRUN	();
+    void        ExecuteRUN();
     void        ExecuteRTT ();
     void        ExecuteCCC ();
     void        ExecuteSCC ();
@@ -271,7 +272,6 @@ protected:  // Implementation - instruction execution
 
     void        ExecuteADD ();
     void        ExecuteSUB ();
-
 };
 
 inline void CProcessor::SetPSW(uint16_t word)
@@ -287,12 +287,12 @@ inline void CProcessor::SetLPSW(uint8_t byte)
 inline void CProcessor::SetReg(int regno, uint16_t word)
 {
     m_R[regno] = word;
-    if ((regno == 7) && ((m_psw & 0600) != 0600))	m_savepc = word;
+    if ((regno == 7) && ((m_psw & 0600) != 0600)) m_savepc = word;
 }
 inline void CProcessor::SetLReg(int regno, uint8_t byte)
 {
     m_R[regno] = (m_R[regno] & 0xFF00) | (uint16_t)byte;
-    if ((regno == 7) && ((m_psw & 0600) != 0600))	m_savepc = m_R[7];
+    if ((regno == 7) && ((m_psw & 0600) != 0600)) m_savepc = m_R[7];
 }
 inline void CProcessor::SetPC(uint16_t word)
 {

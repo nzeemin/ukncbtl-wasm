@@ -1,4 +1,4 @@
-/*  This file is part of UKNCBTL.
+п»ї/*  This file is part of UKNCBTL.
     UKNCBTL is free software: you can redistribute it and/or modify it under the terms
 of the GNU Lesser General Public License as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -20,11 +20,11 @@ UKNCBTL. If not, see <http://www.gnu.org/licenses/>. */
 
 CMemoryController::CMemoryController ()
 {
-    m_pProcessor = NULL;
-    m_pBoard = NULL;
-    m_pMapping = (uint8_t*) malloc(65536);
+    m_pProcessor = nullptr;
+    m_pBoard = nullptr;
+    m_pMapping = static_cast<uint8_t*>(malloc(65536));
     memset(m_pMapping, ADDRTYPE_NONE, 65536);
-    m_pDevices = NULL;
+    m_pDevices = nullptr;
     m_nDeviceCount = 0;
 }
 
@@ -32,30 +32,30 @@ CMemoryController::~CMemoryController ()
 {
     free(m_pMapping);
 
-    if (m_pDevices != NULL)
+    if (m_pDevices != nullptr)
         free(m_pDevices);
 }
 
 void CMemoryController::AttachDevices(const CBusDevice **pDevices)
 {
     // Free the previously allocated memory
-    if (m_pDevices != NULL)
+    if (m_pDevices != nullptr)
     {
-        free(m_pDevices);  m_pDevices = NULL;
+        free(m_pDevices);  m_pDevices = nullptr;
     }
 
     // Calculate device count
     const CBusDevice ** p = pDevices;
     int deviceCount = 0;
-    while (*p != NULL)
+    while (*p != nullptr)
     {
         deviceCount++;
         p++;
     }
 
     // Allocate memory and store the devices
-    m_pDevices = (CBusDevice **) malloc((deviceCount + 1) * sizeof(CBusDevice*));
-    m_pDevices[0] = NULL;
+    m_pDevices = static_cast<CBusDevice **>(calloc((deviceCount + 1), sizeof(CBusDevice*)));
+    m_pDevices[0] = nullptr;
     memcpy(m_pDevices + 1, pDevices, deviceCount * sizeof(CBusDevice*));
     m_nDeviceCount = deviceCount;
 
@@ -71,7 +71,7 @@ void CMemoryController::UpdateMemoryMap()
     for (int device = 1; device <= m_nDeviceCount; device++, pDevices++)
     {
         CBusDevice * pDevice = *pDevices;
-        if (pDevice == NULL) continue;
+        if (pDevice == nullptr) continue;
         uint8_t deviceIndex = (uint8_t)device | ADDRTYPE_IO;
         const uint16_t * pRanges = (*pDevices)->GetAddressRanges();
         while (*pRanges != 0)
@@ -95,9 +95,11 @@ uint16_t CMemoryController::GetWordView(uint16_t address, bool okHaltMode, bool 
     switch (addrtype)
     {
     case ADDRTYPE_RAM0:
+        return m_pBoard->GetRAMWord(0, offset);
     case ADDRTYPE_RAM1:
+        return m_pBoard->GetRAMWord(1, offset);
     case ADDRTYPE_RAM2:
-        return m_pBoard->GetRAMWord((addrtype & ADDRTYPE_MASK_RAM), offset);
+        return m_pBoard->GetRAMWord(2, offset);
     case ADDRTYPE_RAM12:
         return MAKEWORD(
                 m_pBoard->GetRAMByte(1, offset / 2),
@@ -111,6 +113,7 @@ uint16_t CMemoryController::GetWordView(uint16_t address, bool okHaltMode, bool 
     case ADDRTYPE_IO:  // I/O port, not memory
         return 0;
     case ADDRTYPE_DENY:  // This memory is inaccessible for reading
+    case ADDRTYPE_NONE:
         return 0;
     }
 
@@ -126,23 +129,26 @@ uint16_t CMemoryController::GetWord(uint16_t address, bool okHaltMode, bool okEx
     switch (addrtype)
     {
     case ADDRTYPE_RAM0:
+        return m_pBoard->GetRAMWord(0, offset);
     case ADDRTYPE_RAM1:
+        return m_pBoard->GetRAMWord(1, offset);
     case ADDRTYPE_RAM2:
-        return m_pBoard->GetRAMWord((addrtype & ADDRTYPE_MASK_RAM), offset);
+        return m_pBoard->GetRAMWord(2, offset);
     case ADDRTYPE_RAM12:
         return MAKEWORD(
                 m_pBoard->GetRAMByte(1, offset / 2),
                 m_pBoard->GetRAMByte(2, offset / 2));
-    case ADDRTYPE_ROMCART1:
-        return m_pBoard->GetROMCartWord(1, offset);
-    case ADDRTYPE_ROMCART2:
-        return m_pBoard->GetROMCartWord(2, offset);
     case ADDRTYPE_ROM:
         return m_pBoard->GetROMWord(offset);
     case ADDRTYPE_IO:
         //TODO: What to do if okExec == true ?
         return GetPortWord(address);
+    case ADDRTYPE_ROMCART1:
+        return m_pBoard->GetROMCartWord(1, offset);
+    case ADDRTYPE_ROMCART2:
+        return m_pBoard->GetROMCartWord(2, offset);
     case ADDRTYPE_DENY:
+    case ADDRTYPE_NONE:
         //TODO: Exception processing
         return 0;
     }
@@ -159,26 +165,27 @@ uint8_t CMemoryController::GetByte(uint16_t address, bool okHaltMode)
     switch (addrtype)
     {
     case ADDRTYPE_RAM0:
+        return m_pBoard->GetRAMByte(0, offset);
     case ADDRTYPE_RAM1:
+        return m_pBoard->GetRAMByte(1, offset);
     case ADDRTYPE_RAM2:
-        return m_pBoard->GetRAMByte((addrtype & ADDRTYPE_MASK_RAM), offset);
+        return m_pBoard->GetRAMByte(2, offset);
     case ADDRTYPE_RAM12:
         if ((offset & 1) == 0)
             return m_pBoard->GetRAMByte(1, offset / 2);
         else
             return m_pBoard->GetRAMByte(2, offset / 2);
-
-    case ADDRTYPE_ROMCART1:
-        return m_pBoard->GetROMCartByte(1, offset);
-    case ADDRTYPE_ROMCART2:
-        return m_pBoard->GetROMCartByte(2, offset);
-
     case ADDRTYPE_ROM:
         return m_pBoard->GetROMByte(offset);
     case ADDRTYPE_IO:
         //TODO: What to do if okExec == true ?
         return GetPortByte(address);
+    case ADDRTYPE_ROMCART1:
+        return m_pBoard->GetROMCartByte(1, offset);
+    case ADDRTYPE_ROMCART2:
+        return m_pBoard->GetROMCartByte(2, offset);
     case ADDRTYPE_DENY:
+    case ADDRTYPE_NONE:
         //TODO: Exception processing
         return 0;
     }
@@ -195,26 +202,28 @@ void CMemoryController::SetWord(uint16_t address, bool okHaltMode, uint16_t word
     switch (addrtype)
     {
     case ADDRTYPE_RAM0:
+        m_pBoard->SetRAMWord(0, offset, word);
+        return;
     case ADDRTYPE_RAM1:
+        m_pBoard->SetRAMWord(1, offset, word);
+        return;
     case ADDRTYPE_RAM2:
-        m_pBoard->SetRAMWord((addrtype & ADDRTYPE_MASK_RAM), offset, word);
+        m_pBoard->SetRAMWord(2, offset, word);
         return;
     case ADDRTYPE_RAM12:
         m_pBoard->SetRAMByte(1, offset / 2, (uint8_t)(word & 0xff));
         m_pBoard->SetRAMByte(2, offset / 2, (uint8_t)((word >> 8) & 0xff));
         return;
-
+    case ADDRTYPE_IO:
+        SetPortWord(address, word);
+        return;
     case ADDRTYPE_ROMCART1:
     case ADDRTYPE_ROMCART2:
     case ADDRTYPE_ROM:
         // Nothing to do: writing to ROM
         return;
-
-    case ADDRTYPE_IO:
-        SetPortWord(address, word);
-        return;
-
     case ADDRTYPE_DENY:
+    case ADDRTYPE_NONE:
         //TODO: Exception processing
         return;
     }
@@ -230,25 +239,30 @@ void CMemoryController::SetByte(uint16_t address, bool okHaltMode, uint8_t byte)
     switch (addrtype)
     {
     case ADDRTYPE_RAM0:
+        m_pBoard->SetRAMByte(0, offset, byte);
+        return;
     case ADDRTYPE_RAM1:
+        m_pBoard->SetRAMByte(1, offset, byte);
+        return;
     case ADDRTYPE_RAM2:
-        m_pBoard->SetRAMByte((addrtype & ADDRTYPE_MASK_RAM), offset, byte);
+        m_pBoard->SetRAMByte(2, offset, byte);
         return;
     case ADDRTYPE_RAM12:
         if ((offset & 1) == 0)
             m_pBoard->SetRAMByte(1, offset / 2, byte);
         else
             m_pBoard->SetRAMByte(2, offset / 2, byte);
-
+        return;
+    case ADDRTYPE_IO:
+        SetPortByte(address, byte);
+        return;
     case ADDRTYPE_ROMCART1:
     case ADDRTYPE_ROMCART2:
     case ADDRTYPE_ROM:
         // Nothing to do: writing to ROM
         return;
-    case ADDRTYPE_IO:
-        SetPortByte(address, byte);
-        return;
     case ADDRTYPE_DENY:
+    case ADDRTYPE_NONE:
         //TODO: Exception processing
         return;
     }
@@ -264,12 +278,12 @@ void CMemoryController::SetByte(uint16_t address, bool okHaltMode, uint8_t byte)
 //
 // 174000-177777 I/O - USER - read/write
 // 160000-173777     - USER - access denied
-// 000000-157777 ОЗУ - USER - read/write/execute
+// 000000-157777 RAM - USER - read/write/execute
 //
 // 174000-177777 I/O - HALT - read/write
-// 174000-177777 ОЗУ - HALT - execute
-// 160000-173777 ОЗУ - HALT - read/write/execute
-// 000000-157777 ОЗУ - HALT - read/write/execute
+// 174000-177777 RAM - HALT - execute
+// 160000-173777 RAM - HALT - read/write/execute
+// 000000-157777 RAM - HALT - read/write/execute
 //
 // For RAM access, bytes at even addresses (low byte of word) belongs to plane 1,
 // and bytes at odd addresses (high byte of word) - belongs to plane 2.
@@ -280,7 +294,7 @@ CFirstMemoryController::CFirstMemoryController() : CMemoryController()
     m_Port176642 = 0;
     m_Port176644 = 0;
     m_Port176646 = 0;
-    m_Port176560 = m_Port176562 = m_Port176566 = 0;  // Network СА
+    m_Port176560 = m_Port176562 = m_Port176566 = 0;  // Network adapter
     m_Port176564 = 0200;
     m_Port176570 = m_Port176572 = m_Port176576 = 0;  // RS-232 ports
     m_Port176574 = 0200;
@@ -393,30 +407,30 @@ uint16_t CFirstMemoryController::GetPortWord(uint16_t address)
         return 0;
 
     case 0176560: //network
-    case 0176561: // СА: Регистр состояния приемника
+    case 0176561: // РЎРђ: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРёРµРјРЅРёРєР°
         return (m_Port176560 + m_NetStation);
-    case 0176562: // СА: Регистр данных приемника
-    case 0176563: // нижние 8 бит доступны по чтению
+    case 0176562: // РЎРђ: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РїСЂРёРµРјРЅРёРєР°
+    case 0176563: // РЅРёР¶РЅРёРµ 8 Р±РёС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕ С‡С‚РµРЅРёСЋ
         m_Port176560 &= ~010200;  // Reset bit 12 and bit 7
         return (m_Port176562 + m_NetStation);
-    case 0176564: // СА: Регистр состояния источника
+    case 0176564: // РЎРђ: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РёСЃС‚РѕС‡РЅРёРєР°
     case 0176565:
         return (m_Port176564 + m_NetStation);
-    case 0176566: // СА: Регистр данных источника
+    case 0176566: // РЎРђ: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РёСЃС‚РѕС‡РЅРёРєР°
     case 0176567:
         return (0360 + m_NetStation);
 
-    case 0176570:  // Стык С2: Регистр состояния приемника
+    case 0176570:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРёРµРјРЅРёРєР°
     case 0176571:
         return m_Port176570;
-    case 0176572:  // Стык С2: Регистр данных приемника
-    case 0176573:  // нижние 8 бит доступны по чтению
+    case 0176572:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РїСЂРёРµРјРЅРёРєР°
+    case 0176573:  // РЅРёР¶РЅРёРµ 8 Р±РёС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕ С‡С‚РµРЅРёСЋ
         m_Port176570 &= ~010200;  // Reset bit 12 and bit 7
         return m_Port176572;
-    case 0176574:  // Стык С2: Регистр состояния источника
+    case 0176574:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РёСЃС‚РѕС‡РЅРёРєР°
     case 0176575:
         return m_Port176574;
-    case 0176576:  // Стык С2: Регистр данных источника
+    case 0176576:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РёСЃС‚РѕС‡РЅРёРєР°
     case 0176577:
         return 0370;
 
@@ -534,35 +548,35 @@ void CFirstMemoryController::SetPortByte(uint16_t address, uint8_t byte)
         break;
 
     case 0176560: //network
-    case 0176561: //СА: Регистр состояния приемника
+    case 0176561: //РЎРђ: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРёРµРјРЅРёРєР°
         m_Port176560 = (m_Port176560 & ~0104) | (word & 0104);  // Bits 2,6 only
         break;
-    case 0176562: // СА: Регистр данных приемника
-    case 0176563: // недоступен по записи
+    case 0176562: // РЎРђ: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РїСЂРёРµРјРЅРёРєР°
+    case 0176563: // РЅРµРґРѕСЃС‚СѓРїРµРЅ РїРѕ Р·Р°РїРёСЃРё
         return ;
-    case 0176564: // СА: Регистр состояния источника
+    case 0176564: // РЎРђ: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РёСЃС‚РѕС‡РЅРёРєР°
     case 0176565:
         m_Port176564 = (m_Port176564 & ~0105) | (word & 0105);  // Bits 0,2,6
         break;
-    case 0176566: // СА: Регистр данных источника
-    case 0176567: // нижние 8 бит доступны по записи
+    case 0176566: // РЎРђ: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РёСЃС‚РѕС‡РЅРёРєР°
+    case 0176567: // РЅРёР¶РЅРёРµ 8 Р±РёС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕ Р·Р°РїРёСЃРё
         m_Port176566 = word & 0xff;
         m_Port176564 &= ~0200;  // Reset bit 7 (Ready)
         break;
 
-    case 0176570:  // Стык С2: Регистр состояния приемника
+    case 0176570:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРёРµРјРЅРёРєР°
     case 0176571:
         m_Port176570 = (m_Port176570 & ~0100) | (word & 0100);  // Bit 6 only
         break;
-    case 0176572:  // Стык С2: Регистр данных приемника
-    case 0176573:  // недоступен по записи
+    case 0176572:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РїСЂРёРµРјРЅРёРєР°
+    case 0176573:  // РЅРµРґРѕСЃС‚СѓРїРµРЅ РїРѕ Р·Р°РїРёСЃРё
         return ;
-    case 0176574:  // Стык С2: Регистр состояния источника
+    case 0176574:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РёСЃС‚РѕС‡РЅРёРєР°
     case 0176575:
         m_Port176574 = (m_Port176574 & ~0105) | (word & 0105);  // Bits 0,2,6
         break;
-    case 0176576:  // Стык С2: Регистр данных источника
-    case 0176577:  // нижние 8 бит доступны по записи
+    case 0176576:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РёСЃС‚РѕС‡РЅРёРєР°
+    case 0176577:  // РЅРёР¶РЅРёРµ 8 Р±РёС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕ Р·Р°РїРёСЃРё
         m_Port176576 = word & 0xff;
         m_Port176574 &= ~0200;  // Reset bit 7 (Ready)
         break;
@@ -570,7 +584,7 @@ void CFirstMemoryController::SetPortByte(uint16_t address, uint8_t byte)
     default:
         if (!(((m_Port176644 & 0x103) == 0x100) && m_Port176646 == address))
             m_pProcessor->MemoryError();
-//			ASSERT(0);
+//            ASSERT(0);
         break;
     }
 }
@@ -655,41 +669,41 @@ void CFirstMemoryController::SetPortWord(uint16_t address, uint16_t word)
         break;
 
     case 0176560: //network
-    case 0176561: // СА: Регистр состояния приемника
+    case 0176561: // РЎРђ: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРёРµРјРЅРёРєР°
         if (((m_Port176560 & 0300) == 0200) && (word & 0100))
             m_pProcessor->InterruptVIRQ(9, 0360);
         m_Port176560 = (m_Port176560 & ~0104) | (word & 0104);  // Bits 2,6 only
         break;
-    case 0176562:  // СА: Регистр данных приемника
-    case 0176563:  // недоступен по записи
+    case 0176562:  // РЎРђ: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РїСЂРёРµРјРЅРёРєР°
+    case 0176563:  // РЅРµРґРѕСЃС‚СѓРїРµРЅ РїРѕ Р·Р°РїРёСЃРё
         return ;
-    case 0176564:  // СА: Регистр состояния источника
+    case 0176564:  // РЎРђ: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РёСЃС‚РѕС‡РЅРёРєР°
     case 0176565:
         if (((m_Port176564 & 0300) == 0200) && (word & 0100))
             m_pProcessor->InterruptVIRQ(10, 0364);
         m_Port176564 = (m_Port176564 & ~0105) | (word & 0105);  // Bits 0,2,6
         break;
-    case 0176566:  // СА: Регистр данных источника
-    case 0176567:  // нижние 8 бит доступны по записи
+    case 0176566:  // РЎРђ: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РёСЃС‚РѕС‡РЅРёРєР°
+    case 0176567:  // РЅРёР¶РЅРёРµ 8 Р±РёС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕ Р·Р°РїРёСЃРё
         m_Port176566 = word & 0xff;
         m_Port176564 &= ~0200;  // Reset bit 7 (Ready)
         break;
 
-    case 0176570:  // Стык С2: Регистр состояния приемника
+    case 0176570:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РїСЂРёРµРјРЅРёРєР°
     case 0176571:
         m_Port176570 = (m_Port176570 & ~0100) | (word & 0100);  // Bit 6 only
         break;
-    case 0176572:  // Стык С2: Регистр данных приемника
-    case 0176573:  // недоступен по записи
+    case 0176572:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РїСЂРёРµРјРЅРёРєР°
+    case 0176573:  // РЅРµРґРѕСЃС‚СѓРїРµРЅ РїРѕ Р·Р°РїРёСЃРё
         return ;
-    case 0176574:  // Стык С2: Регистр состояния источника
+    case 0176574:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РёСЃС‚РѕС‡РЅРёРєР°
     case 0176575:
         if (((m_Port176574 & 0300) == 0200) && (word & 0100))
             m_pProcessor->InterruptVIRQ(8, 0374);
         m_Port176574 = (m_Port176574 & ~0105) | (word & 0105);  // Bits 0,2,6
         break;
-    case 0176576:  // Стык С2: Регистр данных источника
-    case 0176577:  // нижние 8 бит доступны по записи
+    case 0176576:  // РЎС‚С‹Рє РЎ2: Р РµРіРёСЃС‚СЂ РґР°РЅРЅС‹С… РёСЃС‚РѕС‡РЅРёРєР°
+    case 0176577:  // РЅРёР¶РЅРёРµ 8 Р±РёС‚ РґРѕСЃС‚СѓРїРЅС‹ РїРѕ Р·Р°РїРёСЃРё
         m_Port176576 = word & 0xff;
         m_Port176574 &= ~128;  // Reset bit 7 (Ready)
         break;
@@ -1474,9 +1488,7 @@ void CSecondMemoryController::SetPortWord(uint16_t address, uint16_t word)
 
     case 0177704: // fdd params:
     case 0177705:
-        //#if !defined(PRODUCT)
         //            DebugLogFormat(_T("FDD 177704 W %s, %s, %s\r\n"), oct2, oct1, oct);
-        //#endif
         break;
 
     case 0177710: //timer status

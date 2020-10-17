@@ -1,4 +1,4 @@
-/*  This file is part of UKNCBTL.
+п»ї/*  This file is part of UKNCBTL.
     UKNCBTL is free software: you can redistribute it and/or modify it under the terms
 of the GNU Lesser General Public License as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -16,12 +16,12 @@ UKNCBTL. If not, see <http://www.gnu.org/licenses/>. */
 #include "Defines.h"
 
 
-// Формат отображения режимов адресации
+// Р¤РѕСЂРјР°С‚ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ СЂРµР¶РёРјРѕРІ Р°РґСЂРµСЃР°С†РёРё
 const LPCTSTR ADDRESS_MODE_FORMAT[] =
 {
     _T("%s"), _T("(%s)"), _T("(%s)+"), _T("@(%s)+"), _T("-(%s)"), _T("@-(%s)"), _T("%06o(%s)"), _T("@%06o(%s)")
 };
-// Формат отображения режимов адресации для регистра PC
+// Р¤РѕСЂРјР°С‚ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ СЂРµР¶РёРјРѕРІ Р°РґСЂРµСЃР°С†РёРё РґР»СЏ СЂРµРіРёСЃС‚СЂР° PC
 const LPCTSTR ADDRESS_MODE_PC_FORMAT[] =
 {
     _T("PC"), _T("(PC)"), _T("#%06o"), _T("@#%06o"), _T("-(PC)"), _T("@-(PC)"), _T("%06o"), _T("@%06o")
@@ -125,7 +125,7 @@ uint16_t DisassembleInstruction(uint16_t* pMemory, uint16_t addr, TCHAR* strInst
     uint16_t instr = *pMemory;
 
     uint16_t length = 1;
-    LPCTSTR strReg = NULL;
+    LPCTSTR strReg = nullptr;
     TCHAR strSrc[24];
     TCHAR strDst[24];
     bool okByte;
@@ -173,7 +173,7 @@ uint16_t DisassembleInstruction(uint16_t* pMemory, uint16_t addr, TCHAR* strInst
     case PI_SENZV:  _tcscpy(strInstr, _T("SENZV"));  return 1;
     case PI_SCC:    _tcscpy(strInstr, _T("SCC"));    return 1;
 
-        // Спецкоманды режима HALT ВМ2
+        // РЎРїРµС†РєРѕРјР°РЅРґС‹ СЂРµР¶РёРјР° HALT Р’Рњ2
     case PI_START:  _tcscpy(strInstr, _T("START"));  return 1;
     case PI_STEP:   _tcscpy(strInstr, _T("STEP"));   return 1;
     case PI_RSEL:   _tcscpy(strInstr, _T("RSEL"));   return 1;
@@ -284,25 +284,25 @@ uint16_t DisassembleInstruction(uint16_t* pMemory, uint16_t addr, TCHAR* strInst
         _tcscpy(strInstr, _T("MUL"));
         strReg = REGISTER_NAME[GetDigit(instr, 2)];
         length += ConvertDstToString (instr, addr + 2, strDst, pMemory[1]);
-        _sntprintf(strArg, 32, _T("%s, %s"), strReg, strDst);  // strArg = strReg + ", " + strDst;
+        _sntprintf(strArg, 32, _T("%s, %s"), strDst, strReg);  // strArg = strDst + ", " + strReg;
         return length;
     case PI_DIV:
         _tcscpy(strInstr, _T("DIV"));
         strReg = REGISTER_NAME[GetDigit(instr, 2)];
         length += ConvertDstToString (instr, addr + 2, strDst, pMemory[1]);
-        _sntprintf(strArg, 32, _T("%s, %s"), strReg, strDst);  // strArg = strReg + ", " + strDst;
+        _sntprintf(strArg, 32, _T("%s, %s"), strDst, strReg);  // strArg = strDst + ", " + strReg;
         return length;
     case PI_ASH:
         _tcscpy(strInstr, _T("ASH"));
         strReg = REGISTER_NAME[GetDigit(instr, 2)];
         length += ConvertDstToString (instr, addr + 2, strDst, pMemory[1]);
-        _sntprintf(strArg, 32, _T("%s, %s"), strReg, strDst);  // strArg = strReg + ", " + strDst;
+        _sntprintf(strArg, 32, _T("%s, %s"), strDst, strReg);  // strArg = strDst + ", " + strReg;
         return length;
     case PI_ASHC:
         _tcscpy(strInstr, _T("ASHC"));
         strReg = REGISTER_NAME[GetDigit(instr, 2)];
         length += ConvertDstToString (instr, addr + 2, strDst, pMemory[1]);
-        _sntprintf(strArg, 32, _T("%s, %s"), strReg, strDst);  // strArg = strReg + ", " + strDst;
+        _sntprintf(strArg, 32, _T("%s, %s"), strDst, strReg);  // strArg = strDst + ", " + strReg;
         return length;
     case PI_XOR:
         _tcscpy(strInstr, _T("XOR"));

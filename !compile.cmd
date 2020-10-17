@@ -4,13 +4,13 @@ SET EMSDKPATH=C:\bin\emsdk
 
 CALL %EMSDKPATH%\emsdk_env.bat 
 
-SET SOURCE=Emulator.cpp
-SET SOURCE=%SOURCE% emubase\Disasm.cpp
-SET SOURCE=%SOURCE% emubase\Board.cpp
-SET SOURCE=%SOURCE% emubase\Processor.cpp
-SET SOURCE=%SOURCE% emubase\Memory.cpp
-SET SOURCE=%SOURCE% emubase\Floppy.cpp
-SET SOURCE=%SOURCE% emubase\Hard.cpp
+SET SOURCE=Emulator.cpp ^
+ %SOURCE% emubase\Disasm.cpp ^
+ %SOURCE% emubase\Board.cpp ^
+ %SOURCE% emubase\Processor.cpp ^
+ %SOURCE% emubase\Memory.cpp ^
+ %SOURCE% emubase\Floppy.cpp ^
+ %SOURCE% emubase\Hard.cpp ^
 
 @echo on
 

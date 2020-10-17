@@ -1,4 +1,4 @@
-/*  This file is part of UKNCBTL.
+﻿/*  This file is part of UKNCBTL.
     UKNCBTL is free software: you can redistribute it and/or modify it under the terms
 of the GNU Lesser General Public License as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -18,14 +18,15 @@ class CProcessor;
 class CMemoryController;
 
 // Floppy debug constants
-#define FLOPPY_FSM_WAITFORLSB	0
-#define FLOPPY_FSM_WAITFORMSB	1
-#define FLOPPY_FSM_WAITFORTERM1	2
-#define FLOPPY_FSM_WAITFORTERM2	3
+#define FLOPPY_FSM_WAITFORLSB   0
+#define FLOPPY_FSM_WAITFORMSB   1
+#define FLOPPY_FSM_WAITFORTERM1 2
+#define FLOPPY_FSM_WAITFORTERM2 3
 
 // Trace flags
 #define TRACE_NONE         0  // Turn off all tracing
 #define TRACE_FLOPPY    0100  // Trace floppies
+#define TRACE_CPU       0400  // Trace CPU
 #define TRACE_ALL    0177777  // Trace all
 
 // Emulator image constants
@@ -35,22 +36,22 @@ class CMemoryController;
 #define UKNCIMAGE_HEADER2 0x214C5442  // "BTL!"
 #define UKNCIMAGE_VERSION 0x00010001  // 1.1
 
-#define KEYB_RUS		0x01
-#define KEYB_LAT		0x02
-#define KEYB_LOWERREG	0x10
+#define KEYB_RUS        0x01
+#define KEYB_LAT        0x02
+#define KEYB_LOWERREG   0x10
 
 typedef struct chan_tag
 {
-    uint8_t	data;
-    uint8_t	ready;
-    uint8_t	irq;
-    uint8_t	rdwr;
+    uint8_t data;
+    uint8_t ready;
+    uint8_t irq;
+    uint8_t rdwr;
 } chan_stc;
 
 typedef struct kbd_row_tag
 {
-    uint8_t	processed;
-    uint8_t	row_Y;
+    uint8_t processed;
+    uint8_t row_Y;
 } kbd_row;
 
 // Tape emulator callback used to read a tape recorded data.
@@ -101,6 +102,8 @@ typedef bool (CALLBACK* SERIALOUTCALLBACK)(uint8_t byte);
 //   result     true means OK, false means we have an error
 typedef bool (CALLBACK* PARALLELOUTCALLBACK)(uint8_t byte);
 
+// Terminal out callback -- CPU sends character by channel 0
+typedef void (CALLBACK* TERMINALOUTCALLBACK)(uint8_t byte);
 
 class CFloppyController;
 class CHardDrive;
@@ -123,7 +126,6 @@ public:
 /// \brief UKNC computer
 class CMotherboard
 {
-
 public:  // Construct / destruct
     CMotherboard();
     ~CMotherboard();
@@ -164,11 +166,11 @@ public:  // Memory access
     uint8_t     GetROMCartByte(int cartno, uint16_t offset) const;
 public:  // Debug
     void        DebugTicks();  ///< One Debug PPU tick -- use for debug step or debug breakpoint
-    void        SetCPUBreakpoint(uint16_t bp) { m_CPUbp = bp; } ///< Set current CPU breakpoint
-    void        SetPPUBreakpoint(uint16_t bp) { m_PPUbp = bp; } ///< Set current PPU breakpoint
+    void        SetCPUBreakpoints(const uint16_t* bps) { m_CPUbps = bps; } ///< Set CPU breakpoint list
+    void        SetPPUBreakpoints(const uint16_t* bps) { m_PPUbps = bps; } ///< Set PPU breakpoint list
     uint32_t    GetTrace() const { return m_dwTrace; }
     void        SetTrace(uint32_t dwTrace);
-    chan_stc	GetChannelStruct(unsigned char cpu, unsigned char chan, unsigned char tx)
+    chan_stc    GetChannelStruct(unsigned char cpu, unsigned char chan, unsigned char tx)
     {
         //cpu==1 ,ppu==0; tx==1, rx==0
         if (cpu)
@@ -196,42 +198,41 @@ public:  // System control
     void        Tick8000();  ///< Tick 8.00 MHz
     void        Tick6250();  ///< Tick 6.25 MHz
     void        Tick50();    ///< Tick 50 Hz - goes to CPU/PPU EVNT line
-    void		TimerTick(); ///< Timer Tick, 2uS -- dividers are within timer routine
+    void        TimerTick(); ///< Timer Tick, 2uS -- dividers are within timer routine
     void        ResetFloppy();     ///< INIT signal for FDD
-    uint16_t	GetTimerValue();	///< Returns current timer value
-    uint16_t	GetTimerValueView() { return m_timer; }	///< Returns current timer value for debugger
-    uint16_t	GetTimerReload();	///< Returns timer reload value
-    uint16_t	GetTimerReloadView() { return m_timerreload; }	///< Returns timer reload value for debugger
-    uint16_t	GetTimerState();	///< Returns timer state
-    uint16_t	GetTimerStateView() { return m_timerflags; } ///< Returns timer state for debugger
+    uint16_t    GetTimerValue();    ///< Returns current timer value
+    uint16_t    GetTimerValueView() { return m_timer; } ///< Returns current timer value for debugger
+    uint16_t    GetTimerReload();   ///< Returns timer reload value
+    uint16_t    GetTimerReloadView() { return m_timerreload; }  ///< Returns timer reload value for debugger
+    uint16_t    GetTimerState();    ///< Returns timer state
+    uint16_t    GetTimerStateView() { return m_timerflags; } ///< Returns timer state for debugger
 
-    void		ChanWriteByCPU(uint8_t chan, uint8_t data);
-    void		ChanWriteByPPU(uint8_t chan, uint8_t data);
-    uint8_t		ChanReadByCPU(uint8_t chan);
-    uint8_t		ChanReadByPPU(uint8_t chan);
+    void        ChanWriteByCPU(uint8_t chan, uint8_t data);
+    void        ChanWriteByPPU(uint8_t chan, uint8_t data);
+    uint8_t     ChanReadByCPU(uint8_t chan);
+    uint8_t     ChanReadByPPU(uint8_t chan);
 
-    uint8_t		ChanRxStateGetCPU(uint8_t chan);
-    uint8_t		ChanTxStateGetCPU(uint8_t chan);
-    uint8_t		ChanRxStateGetPPU();
-    uint8_t		ChanTxStateGetPPU();
-    void		ChanRxStateSetCPU(uint8_t chan, uint8_t state);
-    void		ChanTxStateSetCPU(uint8_t chan, uint8_t state);
-    void		ChanRxStateSetPPU(uint8_t state);
-    void		ChanTxStateSetPPU(uint8_t state);
+    uint8_t     ChanRxStateGetCPU(uint8_t chan);
+    uint8_t     ChanTxStateGetCPU(uint8_t chan);
+    uint8_t     ChanRxStateGetPPU();
+    uint8_t     ChanTxStateGetPPU();
+    void        ChanRxStateSetCPU(uint8_t chan, uint8_t state);
+    void        ChanTxStateSetCPU(uint8_t chan, uint8_t state);
+    void        ChanRxStateSetPPU(uint8_t state);
+    void        ChanTxStateSetPPU(uint8_t state);
 
-    void		ChanResetByCPU();
-    void		ChanResetByPPU();
+    void        ChanResetByCPU();
+    void        ChanResetByPPU();
 
-    //void		FloppyDebug(uint8_t val);
-
-    void        SetTimerReload(uint16_t val);	///< Sets timer reload value
-    void        SetTimerState(uint16_t val);	///< Sets timer state
+    void        SetTimerReload(uint16_t val);   ///< Sets timer reload value
+    void        SetTimerState(uint16_t val);    ///< Sets timer state
     void        ExecuteCPU();  ///< Execute one CPU instruction
     void        ExecutePPU();  ///< Execute one PPU instruction
     bool        SystemFrame();  ///< Do one frame -- use for normal run
     void        KeyboardEvent(uint8_t scancode, bool okPressed);  ///< Key pressed or released
-    uint16_t    GetKeyboardRegister(void);
+    uint16_t    GetKeyboardRegister();
     uint16_t    GetScannedKey() { return m_scanned_key; }
+    int         GetSoundChanges() const { return m_SoundChanges; }  ///< Sound signal 0 to 1 changes since the beginning of the frame
 
     /// \brief Attach floppy image to the slot -- insert the disk.
     bool        AttachFloppyImage(int slot, LPCTSTR sFileName);
@@ -276,6 +277,8 @@ public:  // System control
     void        SetParallelOutCallback(PARALLELOUTCALLBACK outcallback);
     /// \brief Assign network port input/output callback functions.
     void        SetNetworkCallbacks(NETWORKINCALLBACK incallback, NETWORKOUTCALLBACK outcallback);
+    /// \brief Assign terminal callback functions.
+    void        SetTerminalCallback(TERMINALOUTCALLBACK callback) { m_TerminalOutCallback = callback; }
 public:  // Saving/loading emulator status
     void        SaveToImage(uint8_t* pImage);
     void        LoadFromImage(const uint8_t* pImage);
@@ -289,39 +292,41 @@ private: // Timing
     int         m_cputicks;
     unsigned int m_lineticks;
 private:
-    uint16_t    m_CPUbp;  ///< Current CPU breakpoint, 177777 if not set
-    uint16_t    m_PPUbp;  ///< Current PPU breakpoint, 177777 if not set
+    const uint16_t* m_CPUbps;  ///< CPU breakpoint list, ends with 177777 value
+    const uint16_t* m_PPUbps;  ///< PPU breakpoint list, ends with 177777 value
     uint32_t    m_dwTrace;  ///< Trace flags
 
-    uint16_t	m_timer;
-    uint16_t	m_timerreload;
-    uint16_t	m_timerflags;
-    uint16_t	m_timerdivider;
+    uint16_t    m_timer;
+    uint16_t    m_timerreload;
+    uint16_t    m_timerflags;
+    uint16_t    m_timerdivider;
 
-    chan_stc	m_chancputx[3];
-    chan_stc	m_chancpurx[2];
-    chan_stc	m_chanpputx[2];
-    chan_stc	m_chanppurx[3];
+    chan_stc    m_chancputx[3];
+    chan_stc    m_chancpurx[2];
+    chan_stc    m_chanpputx[2];
+    chan_stc    m_chanppurx[3];
 
-    uint8_t		m_chan0disabled;
-    uint8_t		m_irq_cpureset;
+    uint8_t             m_chan0disabled;
+    uint8_t             m_irq_cpureset;
 
-    uint8_t		m_scanned_key;
-    kbd_row		m_kbd_matrix[16];
+    uint8_t             m_scanned_key;
+    kbd_row             m_kbd_matrix[16];
 
 private:
-    TAPEREADCALLBACK m_TapeReadCallback;
-    TAPEWRITECALLBACK m_TapeWriteCallback;
-    int			m_nTapeSampleRate;
-    SOUNDGENCALLBACK m_SoundGenCallback;
+    TAPEREADCALLBACK    m_TapeReadCallback;
+    TAPEWRITECALLBACK   m_TapeWriteCallback;
+    int                 m_nTapeSampleRate;
+    SOUNDGENCALLBACK    m_SoundGenCallback;
+    int                 m_SoundPrevValue;  ///< Previous value of the sound signal
+    int                 m_SoundChanges;  ///< Sound signal 0 to 1 changes since the beginning of the frame
     SERIALINCALLBACK    m_SerialInCallback;
     SERIALOUTCALLBACK   m_SerialOutCallback;
     PARALLELOUTCALLBACK m_ParallelOutCallback;
     NETWORKINCALLBACK   m_NetworkInCallback;
     NETWORKOUTCALLBACK  m_NetworkOutCallback;
+    TERMINALOUTCALLBACK m_TerminalOutCallback;
 
     void DoSound(void);
-
 };
 
 inline uint16_t CMotherboard::GetRAMWord(int plan, uint16_t offset) const

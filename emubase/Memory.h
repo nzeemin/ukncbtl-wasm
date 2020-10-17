@@ -1,4 +1,4 @@
-/*  This file is part of UKNCBTL.
+﻿/*  This file is part of UKNCBTL.
     UKNCBTL is free software: you can redistribute it and/or modify it under the terms
 of the GNU Lesser General Public License as published by the Free Software Foundation,
 either version 3 of the License, or (at your option) any later version.
@@ -58,10 +58,6 @@ public:
     virtual void DCLO_Signal() = 0;  ///< DCLO signal
     virtual void ResetDevices() = 0;  ///< INIT signal
 public:  // Access to memory
-    /// \brief Read command for execution
-    uint16_t GetWordExec(uint16_t address, bool okHaltMode) { return GetWord(address, okHaltMode, true); }
-    /// \brief Read word from memory
-    uint16_t GetWord(uint16_t address, bool okHaltMode) { return GetWord(address, okHaltMode, false); }
     /// \brief Read word
     uint16_t GetWord(uint16_t address, bool okHaltMode, bool okExec);
     /// \brief Write word
