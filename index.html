@@ -58,7 +58,7 @@
             padding: 8px;
             font-family: monospace;
             width: 100px;
-            text-align: center;
+            text-align: left;
         }
 
         div.emupanel-left .command-button {
@@ -72,9 +72,13 @@
             padding-bottom: 12px;
         }
 
-        div.emupanel-disks {
+        div.emupanel-group {
             padding-bottom: 8px;
             font-family: monospace;
+        }
+
+        div.emupanel-radio {
+            white-space: nowrap;
         }
 
         div.emupanel-right {
@@ -196,11 +200,26 @@
                     <input id="fileimg" type="file" onchange="emulatorLoadState(this);" style="display: none" />
                     <input type="button" id="loadimg" class="command-button" value="Load State…" onclick="document.getElementById('fileimg').click();" />
                 </div>
-                <div id="uptime" style="white-space: nowrap; margin-top: 8px;"></div>
+                <div id="uptime" style="white-space: nowrap; margin-top: 8px; min-height: 24px;"></div>
+                <div class="emupanel-group">
+                    Colors:
+                    <div class="emupanel-radio">
+                        <input type="radio" name="colors" id="colorMode1" value="RGB" onclick="Module.emulatorColorMode(1)">
+                        <label for="colorMode1">RGB</label>
+                    </div>
+                    <div class="emupanel-radio">
+                        <input type="radio" name="colors" id="colorMode3" value="GRB" onclick="Module.emulatorColorMode(3)" checked>
+                        <label for="colorMode3">GRB</label>
+                    </div>
+                    <div class="emupanel-radio">
+                        <input type="radio" name="colors" id="colorMode2" value="Gray" onclick="Module.emulatorColorMode(2)">
+                        <label for="colorMode2">Gray</label>
+                    </div>
+                </div>
             </div>
             <div class="emupanel-right">
                 Disks:
-                <div class="emupanel-disks">
+                <div class="emupanel-group">
                     <div style="white-space: nowrap">
                         0: <label id="labelmz0"></label>
                         <input id="filemz0" type="file" onchange="emulatorAttachFileInput(this, 0);" style="display: none"/>
@@ -227,7 +246,7 @@
                     </div>
                 </div>
                 Cartridges:
-                <div class="emupanel-disks">
+                <div class="emupanel-group">
                     <div style="white-space: nowrap">
                         1: <label id="labelct1"></label>
                         <input id="filect1" type="file" onchange="emulatorAttachCartInput(this, 1);" style="display: none"/>
@@ -427,8 +446,13 @@
             emulatorKeyEvent: function (scan, pressRelease) {
                 Module.ccall('Emulator_KeyEvent', null, ['number', 'number'], [scan, pressRelease]);
             },
+            screenColorMode: 3, // GRB by default
+            emulatorColorMode: function (mode) {
+                this.screenColorMode = mode;
+                this.drawScreen();
+            },
             drawScreen: function () {
-                var ptrFrameBuffer = Module.ccall('Emulator_PrepareScreen', ['number'], null, null);
+                var ptrFrameBuffer = Module.ccall('Emulator_PrepareScreen', 'number', ['number'], [this.screenColorMode]);
                 var buffer = Module.HEAPU8.subarray(ptrFrameBuffer, ptrFrameBuffer + 640 * 288 * 4);
                 //console.log(buffer);
                 var buffer8 = new Uint8ClampedArray(buffer);
