@@ -198,15 +198,40 @@ extern "C" {
         buffer[4] = slot + '0';
         buffer[5] = 0;
 
-        //FILE* fp = fopen(buffer, "r+b");
-        //if (fp == 0)
-        //	printf("Failed to open file\n");
-        //fseek(fp, 0, SEEK_END);
-        //long filesize = ftell(fp);
-        //printf("File length %ld\n", filesize);
-        //fclose(fp);
-
         g_pBoard->AttachFloppyImage(slot, buffer);
+    }
+
+    EMSCRIPTEN_KEEPALIVE void Emulator_UnloadROMCartridge(int slot)
+    {
+        g_pBoard->UnloadROMCartridge(slot);
+    }
+
+    EMSCRIPTEN_KEEPALIVE void Emulator_LoadROMCartridge(int slot)
+    {
+        char buffer[6];
+        buffer[0] = '/';
+        buffer[1] = 'c';
+        buffer[2] = 'a';
+        buffer[3] = 'r';
+        buffer[4] = slot + '0';
+        buffer[5] = 0;
+
+        FILE* fp = fopen(buffer, "rb");
+        if (fp == 0)
+        	return;
+        uint8_t* pImage = static_cast<uint8_t*>(calloc(24 * 1024, 1));
+        size_t dwBytesRead = fread(pImage, 1, 24 * 1024, fp);
+        fclose(fp);
+        remove(buffer);
+        if (dwBytesRead != 24 * 1024)
+        {
+            free(pImage);
+            return;
+        }
+
+        g_pBoard->LoadROMCartridge(slot, pImage);
+
+        ::free(pImage);
     }
 
     EMSCRIPTEN_KEEPALIVE void Emulator_SystemFrame()

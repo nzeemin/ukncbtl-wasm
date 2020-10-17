@@ -194,36 +194,51 @@
                 <!--<input type="button" value="Draw Screen" onclick="Module.drawScreen()">-->
                 <div style="white-space: nowrap; margin-top: 8px;">
                     <input id="fileimg" type="file" onchange="emulatorLoadState(this);" style="display: none" />
-                    <input type="button" id="loadimg" class="command-button" value="Load State" onclick="document.getElementById('fileimg').click();" />
+                    <input type="button" id="loadimg" class="command-button" value="Load State…" onclick="document.getElementById('fileimg').click();" />
                 </div>
                 <div id="uptime" style="white-space: nowrap; margin-top: 8px;"></div>
             </div>
             <div class="emupanel-right">
+                Disks:
                 <div class="emupanel-disks">
-                    Disks:
                     <div style="white-space: nowrap">
-                        MZ0: <label id="labelmz0"></label>
+                        0: <label id="labelmz0"></label>
                         <input id="filemz0" type="file" onchange="emulatorAttachFileInput(this, 0);" style="display: none"/>
-                        <input type="button" id="attachmz0" value="Attach" onclick="document.getElementById('filemz0').click();" />
+                        <input type="button" id="attachmz0" value="Attach…" onclick="document.getElementById('filemz0').click();" />
                         <input type="button" id="detachmz0" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 0);"/>
                     </div>
                     <div style="white-space: nowrap">
-                        MZ1: <label id="labelmz1"></label>
+                        1: <label id="labelmz1"></label>
                         <input id="filemz1" type="file" onchange="emulatorAttachFileInput(this, 1);" style="display: none"/>
-                        <input type="button" id="attachmz1" value="Attach" onclick="document.getElementById('filemz1').click();" />
+                        <input type="button" id="attachmz1" value="Attach…" onclick="document.getElementById('filemz1').click();" />
                         <input type="button" id="detachmz1" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 1);"/>
                     </div>
                     <div style="white-space: nowrap">
-                        MZ2: <label id="labelmz2"></label>
+                        2: <label id="labelmz2"></label>
                         <input id="filemz2" type="file" onchange="emulatorAttachFileInput(this, 2);" style="display: none"/>
-                        <input type="button" id="attachmz2" value="Attach" onclick="document.getElementById('filemz2').click();" />
+                        <input type="button" id="attachmz2" value="Attach…" onclick="document.getElementById('filemz2').click();" />
                         <input type="button" id="detachmz2" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 2);"/>
                     </div>
                     <div style="white-space: nowrap">
-                        MZ3: <label id="labelmz3"></label>
+                        3: <label id="labelmz3"></label>
                         <input id="filemz3" type="file" onchange="emulatorAttachFileInput(this, 3);" style="display: none"/>
-                        <input type="button" id="attachmz3" value="Attach" onclick="document.getElementById('filemz3').click();" />
+                        <input type="button" id="attachmz3" value="Attach…" onclick="document.getElementById('filemz3').click();" />
                         <input type="button" id="detachmz3" value="Detach" style="display: none" onclick="emulatorDetachFloppy(this, 3);"/>
+                    </div>
+                </div>
+                Cartridges:
+                <div class="emupanel-disks">
+                    <div style="white-space: nowrap">
+                        1: <label id="labelct1"></label>
+                        <input id="filect1" type="file" onchange="emulatorAttachCartInput(this, 1);" style="display: none"/>
+                        <input type="button" id="attachct1" value="Attach…" onclick="document.getElementById('filect1').click();" />
+                        <input type="button" id="detachct1" value="Detach" style="display: none" onclick="emulatorDetachCartridge(this, 1);"/>
+                    </div>
+                    <div style="white-space: nowrap">
+                        2: <label id="labelct2"></label>
+                        <input id="filect2" type="file" onchange="emulatorAttachCartInput(this, 2);" style="display: none"/>
+                        <input type="button" id="attachct2" value="Attach…" onclick="document.getElementById('filect2').click();" />
+                        <input type="button" id="detachct2" value="Detach" style="display: none" onclick="emulatorDetachCartridge(this, 2);"/>
                     </div>
                 </div>
             </div>
@@ -321,6 +336,7 @@
                             document.getElementById('detachmz' + slot).style.display = 'inline';
                         }
                     }
+                    //TODO: Load cartridges if specified
                     // Load saved state if specified
                     var paramState = getParameterByName('state');
                     if (paramState && paramState.substr(0, 4) == 'http') {
@@ -435,6 +451,15 @@
             emulatorDetachFloppy : function(slot) {
                 Module.ccall('Emulator_DetachFloppyImage', null, ['number'], [slot]);
             },
+            emulatorAttachCartridge : function(slot, data) {
+                //console.log('emulatorAttachCartridge', data);
+                Module.ccall('Emulator_UnloadROMCartridge', null, ['number'], [slot]);
+                Module['FS_createDataFile']('/', 'car' + slot, data, true, true, true);
+                Module.ccall('Emulator_LoadROMCartridge', null, ['number'], [slot]);
+            },
+            emulatorDetachCartridge : function(slot) {
+                Module.ccall('Emulator_UnloadROMCartridge', null, ['number'], [slot]);
+            },
             emulatorLoadImage : function(data) {
                 Module['FS_createDataFile']('/', 'image', data, true, true, true);
                 Module.ccall('Emulator_LoadImage', null, null, null);
@@ -538,6 +563,34 @@
             document.getElementById('labelmz' + slot).innerText = '';
             document.getElementById('attachmz' + slot).style.display = 'inline';
             document.getElementById('detachmz' + slot).style.display = 'none';
+        }
+
+        function emulatorAttachCartInput(fileInput, slot) {
+            if (fileInput.files.length == 0)
+                return;
+            var file = fileInput.files[0];
+            if (file.size != 24576)
+                return;
+
+            var fr = new FileReader();
+            fr.onload = function () {
+                var dataarr = new Uint8Array(fr.result);
+                Module.emulatorAttachCartridge(slot, dataarr);
+
+                fileInput.value = '';
+                document.getElementById('labelct' + slot).innerText = file.name;
+                document.getElementById('attachct' + slot).style.display = 'none';
+                document.getElementById('detachct' + slot).style.display = 'inline';
+            };
+            fr.readAsArrayBuffer(file);
+        }
+
+        function emulatorDetachCartridge(button, slot) {
+            Module.emulatorDetachCartridge(slot);
+
+            document.getElementById('labelct' + slot).innerText = '';
+            document.getElementById('attachct' + slot).style.display = 'inline';
+            document.getElementById('detachct' + slot).style.display = 'none';
         }
 
         function emulatorLoadState(fileInput) {
