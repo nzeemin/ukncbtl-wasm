@@ -4,10 +4,10 @@ UKNCBTL — UKNC Back to Life! emulator, WASM version.
 *UKNCBTL* is cross-platform UKNC emulator for Windows/Linux/Mac OS X.
 *UKNC* (*УКНЦ*, Электроника МС-0511) is soviet school computer based on two PDP-11 compatible processors KM1801VM2.
 
-This is UKNCBTL emulator, version for WebAssembly (WASM) to compile with Emscripten and to run in any modern browser.
+This is UKNCBTL emulator version for WebAssembly (WASM) to compile with Emscripten and to run in any modern browser.
 
 Take a look at the emulator here:
-https://nzeemin.github.io/ukncbtl-wasm/index.html
+https://nzeemin.github.io/ukncbtl-online.html
 
 ### Emulator files
 The following files are the result of the compilation:

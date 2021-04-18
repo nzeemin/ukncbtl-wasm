@@ -173,9 +173,9 @@ void CFloppyController::SetCommand(uint16_t cmd)
 
     bool okPrepareTrack = false;  // Нужно ли считывать дорожку в буфер
 
-    // Проверить, не сменился ли текущий привод
+    // Проверить, не сменился ли текущий привод; bit 10 (REZ) should be set
     uint16_t newdrive = (cmd & 3) ^ 3;
-    if (m_drive != newdrive)
+    if ((cmd & 02000) != 0 && m_drive != newdrive)
     {
         FlushChanges();
 
@@ -391,8 +391,7 @@ void CFloppyController::PrepareTrack()
     // Track has 10 sectors, 512 bytes each; offset of the file is === ((Track<<1)+SIDE)*5120
     long foffset = ((m_track * 2) + (m_side)) * 5120;
     if (m_pDrive->okNetRT11Image) foffset += 256;  // Skip .RTD image header
-    //wsprintf(buffer,_T("floppy file offset %d  for trk %d side %d\r\n"),foffset,m_track,m_side);
-    //DebugPrint(buffer);
+    //DebugPrintFormat(_T("floppy file offset %d  for trk %d side %d\r\n"), foffset, m_track, m_side);
 
     uint8_t data[5120];
     memset(data, 0, 5120);
@@ -400,7 +399,7 @@ void CFloppyController::PrepareTrack()
     if (m_pDrive->fpFile != nullptr)
     {
         ::fseek(m_pDrive->fpFile, foffset, SEEK_SET);
-        size_t count = ::fread(&data, 1, 5120, m_pDrive->fpFile);
+        size_t count = ::fread(data, 1, 5120, m_pDrive->fpFile);
         //TODO: Контроль ошибок чтения
     }
 
@@ -453,7 +452,7 @@ void CFloppyController::FlushChanges()
 
         // Save data into the file
         ::fseek(m_pDrive->fpFile, foffset, SEEK_SET);
-        size_t dwBytesWritten = ::fwrite(&data, 1, 5120, m_pDrive->fpFile);
+        size_t dwBytesWritten = ::fwrite(data, 1, 5120, m_pDrive->fpFile);
         //TODO: Проверка на ошибки записи
     }
     else

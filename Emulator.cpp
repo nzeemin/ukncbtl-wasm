@@ -388,6 +388,48 @@ extern "C" {
         printf("Emulator_LoadImage() done\n");
     }
 
+    EMSCRIPTEN_KEEPALIVE void Emulator_SaveImage()
+    {
+        const char * imageFileName = "/image";
+
+        // Open file
+        FILE* fpFile = ::fopen(imageFileName, "w+b");
+        if (fpFile == NULL)
+        {
+            printf("Emulator_SaveImage(): failed to open file\n");
+            return;
+        }
+
+        // Allocate memory
+        uint8_t* pImage = static_cast<uint8_t*>(::calloc(UKNCIMAGE_SIZE, 1));
+        if (pImage == nullptr)
+        {
+            ::fclose(fpFile);
+            printf("Emulator_SaveImage(): calloc failed\n");
+            return;
+        }
+
+        // Prepare header
+        uint32_t* pHeader = (uint32_t*)pImage;
+        *pHeader++ = UKNCIMAGE_HEADER1;
+        *pHeader++ = UKNCIMAGE_HEADER2;
+        *pHeader++ = UKNCIMAGE_VERSION;
+        *pHeader++ = UKNCIMAGE_SIZE;
+        // Store emulator state to the image
+        g_pBoard->SaveToImage(pImage);
+        *(uint32_t*)(pImage + 16) = m_dwEmulatorUptime;
+
+        // Save image to the file
+        size_t dwBytesWritten = ::fwrite(pImage, 1, UKNCIMAGE_SIZE, fpFile);
+        ::free(pImage);
+        ::fclose(fpFile);
+        if (dwBytesWritten != UKNCIMAGE_SIZE)
+        {
+            printf("Emulator_SaveImage(): failed to write file\n");
+            return;
+        }
+    }
+
 #ifdef __cplusplus
 }
 #endif

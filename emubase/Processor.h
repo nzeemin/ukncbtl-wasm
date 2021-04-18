@@ -58,6 +58,7 @@ protected:  // Processor state
 
 protected:  // Current instruction processing
     uint16_t    m_instruction;      ///< Curent instruction
+    uint16_t    m_instructionpc;    ///< Address of the current instruction
     uint8_t     m_regsrc;           ///< Source register number
     uint8_t     m_methsrc;          ///< Source address mode
     uint16_t    m_addrsrc;          ///< Source address
@@ -84,6 +85,7 @@ protected:  // Interrupt processing
     uint8_t     m_VIRQreset;        ///< VIRQ request reset for given device
 protected:
     CMemoryController* m_pMemoryController;
+    bool m_okTrace;                 ///< Trace mode on/off
 
 public:
     CMemoryController* GetMemoryController() { return m_pMemoryController; }
@@ -93,7 +95,7 @@ public:  // Register control
     uint16_t    GetCPSW() const { return m_savepsw; }
     uint8_t     GetLPSW() const { return (uint8_t)(m_psw & 0xff); }  ///< Get PSW lower byte
     void        SetPSW(uint16_t word);  ///< Set the processor status word register value
-    void        SetCPSW(uint16_t word) {m_savepsw = word; }
+    void        SetCPSW(uint16_t word) { m_savepsw = word; }
     void        SetLPSW(uint8_t byte);
     uint16_t    GetReg(int regno) const { return m_R[regno]; }  ///< Get register value, regno=0..7
     void        SetReg(int regno, uint16_t word);  ///< Set register value
@@ -104,7 +106,7 @@ public:  // Register control
     uint16_t    GetPC() const { return m_R[7]; }
     uint16_t    GetCPC() const { return m_savepc; }
     void        SetPC(uint16_t word);
-    void        SetCPC(uint16_t word) {m_savepc = word; }
+    void        SetCPC(uint16_t word) { m_savepc = word; }
 
 public:  // PSW bits control
     void        SetC(bool bFlag);
@@ -136,6 +138,7 @@ public:  // Processor control
     void        CommandExecution();
     int         GetInternalTick() const { return m_internalTick; }
     void        ClearInternalTick() { m_internalTick = 0; }
+    void        SetTrace(bool okTrace) { m_okTrace = okTrace; }  ///< Set trace mode on/off
 
 public:  // Saving/loading emulator status (pImage addresses up to 32 bytes)
     void        SaveToImage(uint8_t* pImage) const;
