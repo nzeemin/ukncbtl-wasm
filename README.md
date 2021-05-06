@@ -10,11 +10,12 @@ Take a look at the emulator here:
 https://nzeemin.github.io/ukncbtl-online.html
 
 ### Emulator files
-The following files are the result of the compilation:
+This is the files needed to run the emulator, the following files are the result of the compilation, plus the static keyboard image:
 * `emul.js`
 * `emul.wasm`
 * `emul.html`
 * `index.html`
+* `keyboard.png`
 
 To make it work you have to put the files on web server; WebAssembly will not work just from a file opened in a browser.
 
@@ -23,6 +24,7 @@ The emulator recognizes and uses the following (optional) URL parameters:
 * `state=URL` — load saved emulator state from the URL and apply it
 * `diskN=URL` — load disk image from the URL and attach it; `N`=0..3
 * `run=1` — run the emulator
+* `color=P` — use palette `P`=1..3, or `rgb`/`grey`/`grb`
 
 Note that the URLs are to download files from the Web by JavaScript code, so that's under restriction of Cross-Origin Resource Sharing (CORS) policy defined on your server.
 
