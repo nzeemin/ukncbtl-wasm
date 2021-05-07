@@ -13,6 +13,7 @@ UKNCBTL. If not, see <http://www.gnu.org/licenses/>. */
 #include "stdafx.h"
 #include "emubase\Emubase.h"
 #include <emscripten/emscripten.h>
+#include "miniz/zip.h"
 
 
 // DebugPrint and DebugLog
@@ -216,6 +217,21 @@ extern "C" {
         ASSERT(g_pBoard != NULL);
 
         g_pBoard->Reset();
+    }
+
+    EMSCRIPTEN_KEEPALIVE void Emulator_Unzip(const char* archivename, const char* filename)
+    {
+        struct zip_t* zip = zip_open(archivename, 0, 'r');
+
+        zip_entry_openbyindex(zip, 0);
+
+        zip_entry_fread(zip, filename);
+
+        zip_entry_close(zip);
+
+        zip_close(zip);
+
+        remove(archivename);
     }
 
     EMSCRIPTEN_KEEPALIVE void Emulator_DetachFloppyImage(int slot)

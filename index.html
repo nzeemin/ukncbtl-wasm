@@ -440,8 +440,9 @@
                                 console.log('Failed to download the disk image from ' + paramDisk);
                                 return;
                             }
-                            Module.emulatorAttachFloppy(slot, data);
-                            document.getElementById('labelmz' + slot).innerText = '???.dsk';
+                            var filename = paramDisk.replace(/^.*[\\\/]/, '')
+                            Module.emulatorAttachFloppy(slot, data, filename);
+                            document.getElementById('labelmz' + slot).innerText = filename;
                             document.getElementById('attachmz' + slot).style.display = 'none';
                             document.getElementById('detachmz' + slot).style.display = 'inline';
                         }
@@ -452,11 +453,12 @@
                     if (paramState && paramState.substr(0, 4) == 'http') {
                         console.log('Loading state from ' + paramState);
                         var data = loadBinaryResource(paramState);
-                        if (!data || data.length != 229888) {
+                        if (!data || data.length > 229888) {
                             console.log('Failed to download the state image from ' + paramState);
                             return;
                         }
-                        Module.emulatorLoadImage(data);
+                        var filename = paramState.replace(/^.*[\\\/]/, '')
+                        Module.emulatorLoadImage(data, filename);
                     }
                     // Autorun & bootup
                     var paramAutorun = getParameterByName('run');
@@ -577,10 +579,16 @@
                 var regval = Module.ccall('Emulator_GetReg', 'number', null, null);
                 //document.getElementById('register').innerText = 'PC ' + (regval < 0 ? regval + 65536 : regval).toString(8);
             },
-            emulatorAttachFloppy : function(slot, data) {
+            emulatorAttachFloppy : function(slot, data, filename) {
                 //console.log('emulatorAttachFloppy', data);
                 Module.ccall('Emulator_DetachFloppyImage', null, ['number'], [slot]);
-                Module['FS_createDataFile']('/', 'dsk' + slot, data, true, true, true);
+                if (filename && filename.toLowerCase().endsWith('.zip')) {
+                    Module['FS_createDataFile']('/', 'zip', data, true, true, true);
+                    Module.ccall('Emulator_Unzip', null, ['string','string'], ['zip', 'dsk' + slot]);
+                }
+                else {
+                    Module['FS_createDataFile']('/', 'dsk' + slot, data, true, true, true);
+                }
                 Module.ccall('Emulator_AttachFloppyImage', null, ['number'], [slot]);
             },
             emulatorDetachFloppy : function(slot) {
@@ -595,8 +603,14 @@
             emulatorDetachCartridge : function(slot) {
                 Module.ccall('Emulator_UnloadROMCartridge', null, ['number'], [slot]);
             },
-            emulatorLoadImage : function(data) {
-                Module['FS_createDataFile']('/', 'image', data, true, true, true);
+            emulatorLoadImage : function(data, filename) {
+                if (filename && filename.toLowerCase().endsWith('.zip')) {
+                    Module['FS_createDataFile']('/', 'zip', data, true, true, true);
+                    Module.ccall('Emulator_Unzip', null, ['string','string'], ['zip', 'image']);
+                }
+                else {
+                    Module['FS_createDataFile']('/', 'image', data, true, true, true);
+                }
                 Module.ccall('Emulator_LoadImage', null, null, null);
                 this.drawScreen();
             }
@@ -682,7 +696,7 @@
             var fr = new FileReader();
             fr.onload = function () {
                 var dataarr = new Uint8Array(fr.result);
-                Module.emulatorAttachFloppy(slot, dataarr);
+                Module.emulatorAttachFloppy(slot, dataarr, file.name);
 
                 fileInput.value = '';
                 document.getElementById('labelmz' + slot).innerText = file.name;
@@ -741,7 +755,7 @@
             var fr = new FileReader();
             fr.onload = function () {
                 var dataarr = new Uint8Array(fr.result);
-                Module.emulatorLoadImage(dataarr);
+                Module.emulatorLoadImage(dataarr, file.name);
 
                 fileInput.value = '';
             };
